@@ -21,7 +21,8 @@
 	     (srfi srfi-19)
 	     (ice-9 getopt-long)
 	     (ice-9 pretty-print)
-	     (ice-9 match))
+	     (ice-9 match)
+	     (ice-9 threads))
 
 
 (define option-spec
@@ -135,18 +136,18 @@
      (file-log logfile "weird status message: " unexpected)
      unexpected)))
 
-(define (create-tables db tablenames)
+(define (create-tables db db-name tablenames)
   (for-each
    (lambda (tablename)
-     (logged-query db tablename
+     (logged-query db db-name
 		   (string-join `("CREATE TABLE IF NOT EXISTS"
 				  ,tablename "(pur_r_id INTEGER)"))))
    tablenames))
 
-(define (add-columns db table columnnames)
+(define (add-columns db table logfile-basename columnnames)
   (for-each
    (lambda (columnname)
-     (logged-query db table
+     (logged-query db logfile-basename
 		   (string-join `("ALTER TABLE" ,table
 				  "ADD COLUMN" ,columnname))
       1))  ; ignore duplicate column name error
@@ -174,7 +175,7 @@
     (something-else
      (list (function (cons "data" something-else))))))
 
-(define (add-row db table columnnames values record-id)
+(define (add-row db db-name table columnnames values record-id)
   (let ((names (string-join (cons +record-id-column+ columnnames) ", "))
 	(vals (string-join
 	       (map (lambda (val)
@@ -183,7 +184,7 @@
 			  (string-join `("'" ,val "'") "")))
 		    (cons record-id values))
 	       ", ")))
-    (logged-query db table
+    (logged-query db (string-append db-name "-" table)
 		  (string-join `("INSERT INTO" ,table
 				 "(" ,names ") VALUES (" ,vals ")")))))
 
@@ -203,20 +204,20 @@
 		(db #f))
 	    (dynamic-wind
 	      (lambda () (set! db (dbi-open "sqlite3" dbfile)))
-	      (lambda () (add-record db payload))
+	      (lambda () (add-record db basename payload))
 	      (lambda () (dbi-close db)))))
 	(file-log #f "Unexpected POST request:" uri-path))))
 
-(define (add-record db json)
+(define (add-record db db-name json)
   (let ((tablenames (ht->tablenames json)))
-    (create-tables db tablenames)
+    (create-tables db db-name tablenames)
     (logged-query db "db" "BEGIN IMMEDIATE TRANSACTION")
     (let ((next-id
 	   (apply
 	    max 
 	    (map
 	     (lambda (table)
-	       (logged-query db table
+	       (logged-query db (string-append db-name "-" table)
 			     (string-join `("SELECT max(" ,+record-id-column+
 					    ") AS last_id FROM" ,table)))
 	       (match (dbi-get_row db)
@@ -229,17 +230,18 @@
       (for-each
        (lambda (table)
 	 (let ((table-content (ht->table-content json table)))
-	   (add-columns db table (columnnames table-content))
+	   (add-columns db table (string-append db-name "-" table)
+			(columnnames table-content))
 	   (let ((names (map-rows car table-content))
 		 (values (map-rows cdr table-content)))
 	     (match names
 	       (((_ ...) ...)
 		(for-each
 		 (lambda (names values)
-		   (add-row db table names values next-id))
+		   (add-row db db-name table names values next-id))
 		 names values))
 	       ((_ ...)
-		(add-row db table names values next-id))))))
+		(add-row db db-name table names values next-id))))))
        tablenames))
     (logged-query db "db" "COMMIT TRANSACTION")))
 	  
@@ -252,6 +254,6 @@
 ;; (dbi-get_row db-obj)
 ;; (dbi-close db-obj)
 
+
 (run-server p-rout-collector
 	    'http `(#:port 80 #:addr ,(inet-pton AF_INET "10.11.0.3")))
-
