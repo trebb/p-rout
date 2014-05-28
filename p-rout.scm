@@ -1,6 +1,40 @@
 #!/usr/bin/guile -s
 !#
 
+;;;; We handle POST requests whose URI ends with ".json".  Suppose we
+;;;; are receiving a request with a URI path of /some/path/foo.json
+;;;; and a body like this:
+;;;;
+;;;;  { "table_one" :
+;;;;    [ { "column1" : 5001,
+;;;;        "column2" : 1
+;;;;      }, 
+;;;;      { "column1" : 9,
+;;;;        "column3" : 1,
+;;;;        "column4" : 342
+;;;;      }
+;;;;    ],
+;;;;    "table_two" : 
+;;;;    { "column1" : 3,
+;;;;      "column2" : "2014-04-20T22:09:15+01:00"
+;;;;    },
+;;;;    "third_table" : "more stuff"
+;;;;  }
+;;;;
+;;;; The following will happen:
+;;;;   - Open sqlite3 database foo.
+;;;;   - Store two rows in table_one.
+;;;;       (1) set column1 = 5001, column2 = 1
+;;;;       (2) set column1 = 3, column3 = 1, column4 = 342
+;;;;   - Store one row in table_two.
+;;;;       (1) set column1 = 3, column2 = "2014-04-20T22:09:15+01:00"
+;;;;   - Store one row in third_table.
+;;;;       (1) set column data = "more stuff"
+;;;;   - Every table has an additional column whose name is in
+;;;;     +record-id-column+ which is unique for each record.
+;;;;   - Databases and tables will be created and columns will be
+;;;;     added as necessary.
+
 ;; On Debian, we may need to
 ;; wget http://download.savannah.gnu.org/releases/guile-json/guile-json-0.3.1.tar.gz,
 ;; wget http://download.gna.org/guile-dbi/guile-dbi-2.1.5.tar.gz,
@@ -24,10 +58,11 @@
 	     (ice-9 match)
 	     (ice-9 threads))
 
-
 (define option-spec
   '((help (single-char #\h))
     (verbose (single-char #\v))
+    (addr (single-char #\a) (value #t))
+    (port (single-char #\p) (value #t))
     (db-dir (value #t))
     (log-dir (value #t))))
 
@@ -39,6 +74,8 @@
  [options]
   -h, --help     Display this help
   -v, --verbose  Display debugging output
+  -a, --addr     Address to listen on
+  -p, --port     Port to listen on
   --db-dir       Database directory (default: \"log-db\")
   --log-dir      Log directory (default: \"log-db\")
 ")
@@ -48,18 +85,23 @@
 (define +verbose+ (option-ref options 'verbose #f))
 (define +db-dir+ (option-ref options 'db-dir "log-db"))
 (define +log-dir+ (option-ref options 'log-dir "log-db"))
+(define +addr+ (option-ref options 'addr "10.11.0.3"))
+(define +port+ (option-ref options 'port 80))
 
+;;; The main HTTP handler
 (define (p-rout-collector request body)
   (cond ((eq? (request-method request) 'POST)
 	 (json-handler request body))
-	(else (not-found request))))
+	(else (not-found-handler request body))))
 
-(define (not-found request)
-  (file-log #f "Unexpected request:" request)
+;;; Unanticipated access
+(define (not-found-handler request)
+  (file-log #f "Unexpected request:" request body)
   (values (build-response #:code 404)
 	  (string-append "Not found: "
 			 (uri->string (request-uri request)))))
 
+;;; The purpose of this HTTP server
 (define (json-handler request body)
   (when +verbose+
     (file-log "json-handler" "Handling request " request (utf8->string body)))
@@ -79,8 +121,8 @@
 	  (scm->json-string (json (object ("status" "ok")
 					  ("next-log-level" 2))))))
 
-(define (ht->l x)
 ;;; Convert JSON hashtable into a list structure
+(define (ht->l x)
   (cond
    ((hash-table? x)
     (hash-map->list (lambda (a b) (cons a (ht->l b))) x))
@@ -88,14 +130,16 @@
     (map (lambda (item) (ht->l item)) x))
    (else x)))
 
-(define (ht->tablenames json)
 ;;; Extract a list of toplevel names from JSON hashtable
+(define (ht->tablenames json)
   (map car (ht->l json)))
 
+;;; Extract from JSON hashtable data for one table
 (define (ht->table-content json tablename)
   (cdar (filter (lambda (x) (equal? tablename (car x)))
 		(ht->l json))))
 
+;;; Put a log entry into file +log-dir+/<basename>.log
 (define (file-log basename . message-parts)
   (system (string-append "mkdir -p " +log-dir+))
   (let ((logfile (string-append +log-dir+ "/" (or basename "unexpected") ".log"))
@@ -121,6 +165,9 @@
 
 (define (now) (date->string (current-date) "~4"))
 
+;;; Send SQL query to database
+;;; ignore-codes are expected database error codes that don't cause
+;;; log entries
 (define (logged-query db logfile query . ignore-codes)
   (when +verbose+
     (file-log logfile query "  sent to  " db))
@@ -136,6 +183,7 @@
      (file-log logfile "weird status message: " unexpected)
      unexpected)))
 
+;;; Make a bunch of SQL tables if necessary
 (define (create-tables db db-name tablenames)
   (for-each
    (lambda (tablename)
@@ -144,6 +192,7 @@
 				  ,tablename "(pur_r_id INTEGER)"))))
    tablenames))
 
+;;; Add a bunch of columns to an SQL table
 (define (add-columns db table logfile-basename columnnames)
   (for-each
    (lambda (columnname)
@@ -153,8 +202,8 @@
       1))  ; ignore duplicate column name error
    columnnames))
 
+;;; Extract from table-content the set of column names
 (define (columnnames table-content)
-  ;; Extract from table-content the set of column names
   (let* ((result '())
 	 (collect-columnnames
 	  (lambda (name-value-pair)
@@ -163,6 +212,7 @@
     (map-rows collect-columnnames table-content)
     (sort (delete-duplicates result) string<?)))
 
+;;; Apply function of (columnname . value) to table-content
 (define (map-rows function table-content)
   (match table-content
     ((((string . _) ...) ...)
@@ -175,6 +225,7 @@
     (something-else
      (list (function (cons "data" something-else))))))
 
+;;; Add a row to SQL table
 (define (add-row db db-name table columnnames values record-id)
   (let ((names (string-join (cons +record-id-column+ columnnames) ", "))
 	(vals (string-join
@@ -188,6 +239,7 @@
 		  (string-join `("INSERT INTO" ,table
 				 "(" ,names ") VALUES (" ,vals ")")))))
 
+;;; "/some/path/foo.json" -> "foo"
 (define (uri-path->basename uri-path)
   (let ((uri-extension ".json")
 	(filename (last (split-and-decode-uri-path uri-path))))
@@ -195,6 +247,8 @@
 	(string-drop-right filename (string-length uri-extension))
 	#f)))
   
+;;; Put data from JSON payload into SQL database whose name is derived
+;;; from uri-path
 (define (store-record uri-path payload)
   (let ((basename (uri-path->basename uri-path)))
     (if basename
@@ -208,6 +262,7 @@
 	      (lambda () (dbi-close db)))))
 	(file-log #f "Unexpected POST request:" uri-path))))
 
+;;; Store one record into SQL database
 (define (add-record db db-name json)
   (let ((tablenames (ht->tablenames json)))
     (create-tables db db-name tablenames)
@@ -256,4 +311,4 @@
 
 
 (run-server p-rout-collector
-	    'http `(#:port 80 #:addr ,(inet-pton AF_INET "10.11.0.3")))
+	    'http `(#:port +port+ #:addr ,(inet-pton AF_INET +addr+)))
