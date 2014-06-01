@@ -13,7 +13,8 @@
 	     (web request)
 	     (web response)
 	     (web uri)
-	     (rnrs base)
+	     (sxml simple)
+	     ((rnrs base) #:select (assert))
 	     (rnrs bytevectors)
 	     (rnrs io ports)
 	     (os process)
@@ -55,26 +56,89 @@
 
 (define +diagrams+
   '(("Battery"
-     ("logs" ("header" "module_statuses") "header.time_send")
-     (("Battery Voltage"
-       "module_statuses.param_0 / 100" "module_statuses.module_id = 11" "lines smooth bezier")
-      ("Charge State" 
-       "module_statuses.param_1 + 1" "module_statuses.module_id = 11" "lines smooth bezier")))
-    ("Something Else"
-     ("logs" ("header" "module_statuses") "header.time_send")
-     (("Battery stuff"
-       "param_3" "module_statuses.module_id = 11" "lines smooth bezier")
-      ("Charge State"
-       "param_3" "module_statuses.module_id = 11" "lines smooth bezier")))))
+     ("logs" ("header" "module_statuses") "header.time_send"
+     "")
+     (("I_{charge}"
+       "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("v_{charge}"
+       "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("I_{discharge}" 
+       "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("V_{discharge}" 
+       "module_statuses.param_11 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("V_{batt}" 
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("T_{batt}" 
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("SOC" 
+       "module_statuses.param_5" "module_statuses.module_id = 136" "filledcurve x1 lc rgb 'green'")))
+    ("Solar"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "set keytitle '{/=12 Solar}'\n")
+     (("V_{bus_dcac}"
+       "module_statuses.param_8 / 100" "module_statuses.module_id = 9" "lines smooth bezier")))      
+    ("Power"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "set keytitle '{/=12 Power}'\n")
+     (("P_{batt}"
+       "module_statuses.param_2" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("P_{local}"
+       "module_statuses.param_6" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("P_{grid_{dcac}}"
+       "module_statuses.param_2" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("P_{grid_{platform}}"
+       "module_statuses.param_3" "module_statuses.module_id = 16" "lines smooth bezier")
+      ("P_{solar}"
+       "module_statuses.param_10" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("P_{L1}"
+       "module_statuses.param_2" "module_statuses.module_id = 11" "lines smooth bezier")
+      ("P_{L2}"
+       "module_statuses.param_6" "module_statuses.module_id = 11" "lines smooth bezier")
+      ("P_{L3}"
+       "module_statuses.param_10" "module_statuses.module_id = 11" "lines smooth bezier")))
+    ("Voltage"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "set keytitle '{/=12 AC Voltage}'\nset yrange [200:250]\n")
+     (("V_{local}"
+       "module_statuses.param_5 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("V_{grid_{dcac}}"
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("V_{grid_{platform}}"
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 16" "lines smooth bezier")
+      ("V_{L1}"
+       "module_statuses.param_0 / 10" "module_statuses.module_id = 11" "lines smooth bezier")
+      ("V_{L2}"
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 11" "lines smooth bezier")
+      ("V_{L3}"
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 11" "lines smooth bezier")))
+    ("Temperature"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "set keytitle '{/=12 Temperature}'\n")
+     (("T_{dcac}"
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("T_{platform}"
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines smooth bezier")
+      ("T_{batt}"
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("T_{batt_{module}}"
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("T_{solar}"
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines smooth bezier")))))
 
 (define (dbfile diagram)
   (first (cadr (assoc diagram +diagrams+))))
+
+(define (diagrams)
+  (map car +diagrams+))
 
 (define (tables diagram)
   (second (cadr (assoc diagram +diagrams+))))
 
 (define (date-column diagram)
   (third (cadr (assoc diagram +diagrams+))))
+
+(define (gnuplot-settings diagram)
+  (fourth (cadr (assoc diagram +diagrams+))))
 
 (define (curve-names diagram)
   (map car (caddr (assoc diagram +diagrams+))))
@@ -91,16 +155,39 @@
   (third (cdr (assoc curve-name
 		     (caddr (assoc diagram +diagrams+))))))
 
+(define (uri-file-name request)
+  (car (take-right (uri-elements request) 1)))
+
+(define (uri-elements request)
+  (split-and-decode-uri-path (uri-path (request-uri request))))
+
+(define (uri-dir-elements request)
+  (drop-right (uri-elements request) 1))
+
+(define (uri-basename request)
+  (car (string-split (uri-file-name request) #\.)))
+
+(define (uri-extension request)
+  (cadr (string-split (uri-file-name request) #\.)))
+
+(define (uri-query-elements request)
+  ;; Split at ',' because the Right Thing (splitting at '&') doesn't
+  ;; play well with sxml->xml.
+  (string-split (uri-query (request-uri request)) #\,))
+
+(define (date-plus-seconds date seconds)
+  (time-utc->date (add-duration (date->time-utc date)
+				(make-time 'time-duration 0 seconds))))
+
 (define (p-rout-publisher request body)
-  (let ((uri-elements
-	 (split-and-decode-uri-path (uri-path (request-uri request)))))
-  (cond ((equal? uri-elements '("view"))
+  (cond ((equal? '("view") (uri-elements request))
 	 (view-handler request body))
-	((equal? (drop-right uri-elements 1) '("view" "diagram"))
+	((and (equal? '("view" "diagram") (uri-dir-elements request))
+	      (string=? "svg" (uri-extension request)))
 	 (view-diagram-handler request body))
-	((equal? (drop-right uri-elements 1) '("view" "lib"))
+	((equal? '("view" "lib") (uri-dir-elements request))
 	 (view-lib-handler request body))
-	(else (not-found request)))))
+	(else (not-found request))))
 
 (define (not-found request)
   (values (build-response #:code 404)
@@ -110,25 +197,23 @@
 (define (view-handler request body)
   (values (build-response #:code 200
 			  #:reason-phrase "Ok"
-			  #:headers `((content-type . (text/plain)) 
+			  #:headers `((content-type . (text/html)) 
 				      (charset . "utf-8")))
-	  (view-data "logs" "header")))
+	  (html-diagram (first (diagrams))
+			(date->string (date-plus-seconds (current-date) (* -3600 24 7)) "~5")
+	  		(date->string (current-date) "~5"))))
 
 (define (view-diagram-handler request body)
-  (let* ((uri (request-uri request))
-	 (uri-file-name
-	  (car (take-right (split-and-decode-uri-path (uri-path uri)) 1)))
-	 (uri-query (uri-query uri)))
-    (values (build-response #:code 200
-			    #:reason-phrase "Ok"
-			    #:headers `((content-type . (image/svg+xml)) 
-					(charset . "utf-8")))
-	    (catch #t
-	      (lambda () (assert (apply plot-svg
-					(car (string-split uri-file-name #\.))
-					(string-split uri-query
-						      #\&))))
-	      (lambda (err . args) "<svg> </svg>")))))
+  (values (build-response #:code 200
+			  #:reason-phrase "Ok"
+			  #:headers `((content-type . (image/svg+xml)) 
+				      (charset . "utf-8")))
+	  (catch #t
+	    (lambda ()
+	      (assert (apply plot-svg
+			     (uri-basename request)
+			     (uri-query-elements request))))
+	    (lambda (err . args) "<svg> </svg>"))))
 
 (define (view-lib-handler request body)
   (values (build-response #:code 200
@@ -137,16 +222,24 @@
 				      (charset . "utf-8")))
 	  (let ((file-name
 		 (string-append
-		  +gnuplot-lib-dir+ "/"
-		  (car
-		   (take-right
-		    (split-and-decode-uri-path (uri-path (request-uri request)))
-		    1)))))
+		  +gnuplot-lib-dir+ "/" (uri-file-name request))))
 	    (catch #t
 	      (lambda ()
 		(with-input-from-file
 		    file-name (lambda () (read-delimited ""))))
 	      (lambda (err . args) "nothing here")))))
+
+(define (html-diagram diagram from-date to-date)
+  (with-output-to-string
+    (lambda ()
+      (sxml->xml
+       `(*TOP* (html
+		(body
+		 (p
+		  (img (@ (width "1200")
+			  (height "800")
+			  (src ,(string-append "diagram/" diagram ".svg?" from-date "," to-date)))))
+		 (p "some text"r))))))))
 
 (define (view-data dbfile table)
   (system (string-append "mkdir -p " +db-dir+))
@@ -208,13 +301,18 @@
 (define (gnuplot-commands diagram from-date to-date)
   (let ((curve-names (curve-names diagram)))
     (string-append
-     "set terminal 'svg' mouse jsdir '/view/lib/'"
+     "set terminal 'svg' enhanced linewidth 2 mouse jsdir '/view/lib/'"
      " size 1200, 800 dynamic fsize 8\n"
+     "set encoding utf8\n"
      "set output\n"
-     "set key left box\n"
+     "set key left\n"
+     "set keytitle '{/=12 " diagram "}'\n"	;just a default title
      "set timefmt '%Y-%m-%dT%H:%M:%S'\n"
      "set format x \"%a\\n%Y-%m-%d\\n%H:%M:%S\"\n"
      "set xdata time\n"
+     "set style fill transparent solid 0.2 noborder\n"
+     (gnuplot-settings diagram)
+     "\n"
      "plot "
      (string-join
       (map (lambda (curve-name)
@@ -244,4 +342,4 @@
 	#f
 	svg)))
 
-;; (run-server p-rout-publisher 'http `(#:port 8080 #:addr ,(inet-pton AF_INET "192.168.178.51")))
+(run-server p-rout-publisher 'http `(#:port 8080 #:addr ,(inet-pton AF_INET "192.168.178.51")))
