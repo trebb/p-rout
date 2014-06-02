@@ -179,14 +179,18 @@
   (third (cdr (assoc curve-name
 		     (caddr (assoc diagram +diagrams+))))))
 
-(define (uri-file-name request)
-  (car (take-right (uri-elements request) 1)))
-
 (define (uri-elements request)
   (split-and-decode-uri-path (uri-path (request-uri request))))
 
+(define (uri-file-name request)
+  (if (null? (uri-elements request))
+      ""
+      (car (take-right (uri-elements request) 1))))
+
 (define (uri-dir-elements request)
-  (drop-right (uri-elements request) 1))
+  (if (null? (uri-elements request))
+      '()
+      (drop-right (uri-elements request) 1)))
 
 (define (uri-basename request)
   (car (string-split (uri-file-name request) #\.)))
