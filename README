@@ -1,0 +1,18 @@
+P-rout
+======
+
+P-rout may be useful for ownwers of one of the various types of a
+solar energy appliance called Powerrouter, manufactured by Nedap
+N.V.
+
+The appliance is connected to the Internet and uploads data to an HTTP
+server (logging1.powerrouter.com) that is owned by the manufacturer,
+who provides another HTTP server where customers can view their data.
+
+This project does basically the same while keeping everything on the
+owner's premises.  It provides a data-collecting HTTP server where the
+Powerrouter can upload.  Data is stored in SQLite databases and can be
+reviewed on a second HTTP server.
+
+P-rout is intended to be installed on a single-board computer.  It
+currently lacks a decent installation procedure.
