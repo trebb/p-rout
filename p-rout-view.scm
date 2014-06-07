@@ -24,15 +24,6 @@
 ;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 
-
-;; On Debian, we may need to
-;; wget http://download.gna.org/guile-dbi/guile-dbi-2.1.5.tar.gz,
-;; wget http://download.gna.org/guile-dbi/guile-dbd-sqlite3-2.1.4.tar.gz,
-;; ./configure; make; make install, respectively,
-;; ldconfig,
-;; and to
-;; (add-to-load-path "/usr/local/share/guile/site/")
-
 (use-modules (web server)
 	     (web request)
 	     (web response)
@@ -50,12 +41,13 @@
 	     (ice-9 match)
 	     (ice-9 rdelim))
 
-
 (define option-spec
   '((help (single-char #\h))
     (verbose (single-char #\v))
     (db-dir (value #t))
     (log-dir (value #t))
+    (addr (single-char #\a) (value #t))
+    (port (single-char #\p) (value #t))
     (gnuplot-lib-dir (value #t))))
 
 (define options (getopt-long (command-line) option-spec))
@@ -68,6 +60,8 @@
   -v, --verbose     Display debugging output
   --db-dir          Database directory (default: \"log-db\")
   --log-dir         Log directory (default: \"log-db\")
+  -a, --addr        Address to listen on
+  -p, --port        Port to listen on
   --gnuplot-lib-dir Gnuplot's Javascript directory
 ")
   (exit))
@@ -77,11 +71,17 @@
 (define +db-dir+ (option-ref options 'db-dir "log-db"))
 (define +log-dir+ (option-ref options 'log-dir "log-db"))
 (define +gnuplot-lib-dir+ "/usr/share/gnuplot/4.6/js")
+(define +addr+ (option-ref options 'addr' "192.168.178.51"))
+(define +port+ (option-ref options 'port' 8080))
+(define +from-label+ "From")
+(define +to-label+ "To")
+(define +table-number-of-columns+ 12)
+(define +diagram-number-of-values+ 200)
 
 (define +diagrams+
   '(("Battery"
      ("logs" ("header" "module_statuses") "header.time_send"
-     "")
+     "" as-diagram)
      (("I_{charge}"
        "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
       ("v_{charge}"
@@ -98,12 +98,16 @@
        "module_statuses.param_5" "module_statuses.module_id = 136" "filledcurve x1 lc rgb 'green'")))
     ("Solar"
      ("logs" ("header" "module_statuses") "header.time_send"
-      "set keytitle '{/=12 Solar}'\n")
-     (("V_{bus_dcac}"
-       "module_statuses.param_8 / 100" "module_statuses.module_id = 9" "lines smooth bezier")))      
+      "set keytitle '{/=12 Solar}'\n" as-diagram)
+     (("P/kW"
+       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("V/100V"
+       "module_statuses.param_5 / 10000" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("I"
+       "module_statuses.param_6 / 100" "module_statuses.module_id = 12" "lines smooth bezier")))
     ("Power"
      ("logs" ("header" "module_statuses") "header.time_send"
-      "set keytitle '{/=12 Power}'\n")
+      "set keytitle '{/=12 Power}'\n" as-diagram)
      (("P_{batt}"
        "module_statuses.param_2" "module_statuses.module_id = 136" "lines smooth bezier")
       ("P_{local}"
@@ -122,7 +126,7 @@
        "module_statuses.param_10" "module_statuses.module_id = 11" "lines smooth bezier")))
     ("Voltage"
      ("logs" ("header" "module_statuses") "header.time_send"
-      "set keytitle '{/=12 AC Voltage}'\nset yrange [200:250]\n")
+      "set keytitle '{/=12 AC Voltage}'\nset yrange [220:240]\n" as-diagram)
      (("V_{local}"
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
       ("V_{grid_{dcac}}"
@@ -135,9 +139,16 @@
        "module_statuses.param_4 / 10" "module_statuses.module_id = 11" "lines smooth bezier")
       ("V_{L3}"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 11" "lines smooth bezier")))
+    ("Frequency"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "" as-diagram)
+     (("f_{dcac}"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("f_{platform}"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 16" "lines smooth bezier")))
     ("Temperature"
      ("logs" ("header" "module_statuses") "header.time_send"
-      "set keytitle '{/=12 Temperature}'\n")
+      "set keytitle '{/=12 Temperature}'\n" as-diagram)
      (("T_{dcac}"
        "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
       ("T_{platform}"
@@ -147,7 +158,45 @@
       ("T_{batt_{module}}"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
       ("T_{solar}"
-       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines smooth bezier")))))
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines smooth bezier")))
+    ("Energy"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "" as-table)
+     (("Platform consumed"
+       "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
+      ("Platform produced"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
+      ("DC/AC consumed"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
+      ("DC/AC produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
+      ("Local DC/AC consumed"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
+      ("Local DC/AC produced"
+       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
+      ("Battery consumed"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 136")
+      ("Battery produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
+      ("Solar produced"
+       "module_statuses.param_11 / 1000" "module_statuses.module_id = 12")
+      ("L1 consumed"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
+      ("L2 consumed"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 11")
+      ("L3 consumed"
+       "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")))
+    ("Status"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Raw status strings" as-table)
+     (("Platform"
+       "module_statuses.status" "module_statuses.module_id = 16")
+      ("DC/AC"
+       "module_statuses.status" "module_statuses.module_id = 9")
+      ("Battery"
+       "module_statuses.status" "module_statuses.module_id = 136")
+      ("Solar"
+       "module_statuses.status" "module_statuses.module_id = 12")))))
 
 (define (dbfile diagram)
   (first (cadr (assoc diagram +diagrams+))))
@@ -161,8 +210,15 @@
 (define (date-column diagram)
   (third (cadr (assoc diagram +diagrams+))))
 
+;;; SQL date column name minus table prefix
+(define (stripped-date-column diagram . dummy)
+  (car (take-right (string-split (date-column diagram) #\.) 1)))
+
 (define (gnuplot-settings diagram)
   (fourth (cadr (assoc diagram +diagrams+))))
+
+(define (render-mode diagram)
+  (fifth (cadr (assoc diagram +diagrams+))))
 
 (define (curve-names diagram)
   (map car (caddr (assoc diagram +diagrams+))))
@@ -170,6 +226,10 @@
 (define (columnname diagram curve-name)
   (first (cdr (assoc curve-name
 		     (caddr (assoc diagram +diagrams+))))))
+
+;;; SQL column name minus table prefix
+(define (stripped-columnname diagram curve-name)
+  (car (take-right (string-split (columnname diagram curve-name) #\.) 1)))
 
 (define (sql-where diagram curve-name)
   (second (cdr (assoc curve-name
@@ -192,16 +252,23 @@
       '()
       (drop-right (uri-elements request) 1)))
 
-(define (uri-basename request)
-  (car (string-split (uri-file-name request) #\.)))
+;;; Turn query part of URI into an alist
+(define (uri-query-components request)
+  (let ((query (uri-query (request-uri request))))
+    (map (lambda (query-component)
+	   (let ((component (string-split query-component #\=)))
+	     (cons (first component) (second component))))
+	 (string-split query #\&))))
 
-(define (uri-extension request)
-  (cadr (string-split (uri-file-name request) #\.)))
+;;; Put a T between day and hour
+(define (normalize-date-string date-string-with-space)
+  (date->string (string->date date-string-with-space "~Y-~m-~d ~H:~M")
+		"~5"))
 
-(define (uri-query-elements request)
-  ;; Split at ',' because the Right Thing (splitting at '&') doesn't
-  ;; play well with sxml->xml.
-  (string-split (uri-query (request-uri request)) #\,))
+;;; Remove the T between day and hour
+(define (humanize-date-string date-string-with-a-t)
+  (date->string (string->date date-string-with-a-t "~Y-~m-~dT~H:~M")
+		"~Y-~m-~d ~H:~M"))
 
 (define (date-plus-seconds date seconds)
   (time-utc->date (add-duration (date->time-utc date)
@@ -210,9 +277,10 @@
 (define (p-rout-publisher request body)
   (cond ((equal? '("view") (uri-elements request))
 	 (view-handler request body))
-	((and (equal? '("view" "diagram") (uri-dir-elements request))
-	      (string=? "svg" (uri-extension request)))
-	 (view-diagram-handler request body))
+	((equal? '("view" "render") (uri-elements request))
+	 (view-render-handler request body))
+	((equal? '("view" "lib" "datetimepicker_css.js") (uri-elements request))
+	 (view-lib-datetimepicker-handler request body))
 	((equal? '("view" "lib") (uri-dir-elements request))
 	 (view-lib-handler request body))
 	(else (not-found request))))
@@ -222,26 +290,104 @@
 	  (string-append "Not found: "
 			 (uri->string (request-uri request)))))
 
+(define (sxml-date-input label)
+  `((label (@ (for ,label))
+       ,(string-append label " "))
+  (input (@ (type "Text")
+	    (id ,label)
+	    (name ,label)
+	    (maxlength "16") (size "16")
+	    (onclick ,(string-append "javascript:NewCssCal('"
+				     label
+				     "','yyyyMMdd','dropdown',true,'24')"))))))
+
+(define (sxml-diagram-inputs)
+  (map (lambda (diagram)
+	 `(input (@ (type "radio")
+		    (name "diagram")
+		    (value ,diagram))
+		 ,(string-append diagram " ")))
+       (diagrams)))
+
 (define (view-handler request body)
   (values (build-response #:code 200
 			  #:reason-phrase "Ok"
 			  #:headers `((content-type . (text/html)) 
 				      (charset . "utf-8")))
-	  (html-diagram (first (diagrams))
-			(date->string (date-plus-seconds (current-date) (* -3600 24 7)) "~5")
-	  		(date->string (current-date) "~5"))))
-
-(define (view-diagram-handler request body)
-  (values (build-response #:code 200
-			  #:reason-phrase "Ok"
-			  #:headers `((content-type . (image/svg+xml)) 
-				      (charset . "utf-8")))
-	  (catch #t
+	  (with-output-to-string
 	    (lambda ()
-	      (assert (apply plot-svg
-			     (uri-basename request)
-			     (uri-query-elements request))))
-	    (lambda (err . args) "<svg> </svg>"))))
+	      (display "<!DOCTYPE html>\n")
+	      (sxml->xml
+	       `(html
+		 (@ (lang "en"))
+		 (head
+		  (script (@ (src "/view/lib/datetimepicker_css.js")) ""))
+		 (body
+		  (div
+		   (@ (style "text-align:center; margin:150px auto 100px auto;"))
+		   (form
+		    (@ (action "/view/render"))
+		    (p ,(sxml-date-input +from-label+)
+		       " "
+		       ,(sxml-date-input +to-label+))
+		    (p ,(sxml-diagram-inputs))
+		    (p (input (@ (type "submit")
+				 (value "Go")))))))))))))
+
+(define (view-render-handler request body)
+  (let ((render-mode
+	 (render-mode (cdr (assoc "diagram"
+				  (uri-query-components request))))))
+    (cond ((eq? 'as-diagram render-mode)
+	   (view-render-diagram-handler request body))
+	  ((eq? 'as-table render-mode)
+	   (view-render-table-handler request body)))))
+	   
+(define (view-render-diagram-handler request body)
+  (let ((query-alist (uri-query-components request)))
+    (values
+     (build-response #:code 200
+		     #:reason-phrase "Ok"
+		     #:headers `((content-type . (image/svg+xml)) 
+				 (charset . "utf-8")))
+     (catch #t
+       (lambda ()
+	 (assert
+	  (plot-svg (cdr (assoc "diagram" query-alist))
+		    (normalize-date-string
+		     (uri-decode (cdr (assoc +from-label+ query-alist))))
+		    (normalize-date-string
+		     (uri-decode (cdr (assoc +to-label+ query-alist)))))))
+       (lambda (err . args)
+	 (with-output-to-string
+	   (lambda ()
+	     (sxml->xml `(svg (@ (viewBox "0 0 1200 800")
+				 (xmlns "http://www.w3.org/2000/svg"))
+			      (title "No Data")
+			      (text "No Data"))))))))))
+	   
+(define (view-render-table-handler request body)
+  (let ((query-alist (uri-query-components request)))
+    (values
+     (build-response #:code 200
+		     #:reason-phrase "Ok"
+		     #:headers `((content-type . (text/html)) 
+				 (charset . "utf-8")))
+     (catch #t
+       (lambda ()
+	 (assert
+	  (tabulate (cdr (assoc "diagram" query-alist))
+		    (normalize-date-string
+		     (uri-decode (cdr (assoc +from-label+ query-alist))))
+		    (normalize-date-string
+		     (uri-decode (cdr (assoc +to-label+ query-alist)))))))
+       (lambda (err . args)
+	 (with-output-to-string
+	   (lambda ()
+	     (sxml->xml `(svg (@ (viewBox "0 0 1200 800")
+				 (xmlns "http://www.w3.org/2000/svg"))
+			      (title "No Data")
+			      (text "No Data"))))))))))
 
 (define (view-lib-handler request body)
   (values (build-response #:code 200
@@ -253,21 +399,21 @@
 		  +gnuplot-lib-dir+ "/" (uri-file-name request))))
 	    (catch #t
 	      (lambda ()
-		(with-input-from-file
-		    file-name (lambda () (read-delimited ""))))
+		(with-input-from-file file-name
+		  (lambda () (read-delimited ""))))
 	      (lambda (err . args) "nothing here")))))
 
-(define (html-diagram diagram from-date to-date)
-  (with-output-to-string
-    (lambda ()
-      (sxml->xml
-       `(*TOP* (html
-		(body
-		 (p
-		  (img (@ (width "1200")
-			  (height "800")
-			  (src ,(string-append "diagram/" diagram ".svg?" from-date "," to-date)))))
-		 (p "some text"r))))))))
+(define (view-lib-datetimepicker-handler request body)
+  (values (build-response #:code 200
+			  #:reason-phrase "Ok"
+			  #:headers `((content-type . (text/javascript)) 
+				      (charset . "utf-8")))
+	  (catch #t
+	    (lambda ()
+	      (with-input-from-file (uri-file-name request)
+		(lambda () (read-delimited ""))))
+	    (lambda (err . args) "nothing here"))))
+
 
 (define (view-data dbfile table)
   (system (string-append "mkdir -p " +db-dir+))
@@ -285,25 +431,35 @@
       (lambda () (dbi-close db)))))
 
 
+(define (get-sql-row-sql diagram curve-name from-date to-date number-of-rows)
+  (string-append
+   "WITH t (id, date, value) AS"
+   " (SELECT " +record-id-column+
+   ", " (date-column diagram)
+   ", " (columnname diagram curve-name)
+   " FROM "
+   (let ((tables (tables diagram)))
+     (if (> (length tables) 1)
+	 (string-append (string-join tables ", ")
+			" USING (" +record-id-column+ ")")
+	 (car tables)))
+   " WHERE ("
+   (date-column diagram) " BETWEEN \"" from-date "\" AND \"" to-date
+   "\")"
+   (let ((sql-where (sql-where diagram curve-name)))
+     (if sql-where
+	 (string-append " AND " sql-where)
+	 ""))
+   ")"
+   " SELECT date, value FROM t WHERE id % (SELECT 1 + count(*) / "
+   (number->string number-of-rows)
+   " FROM t) = 0"
+   " ORDER BY id LIMIT " (number->string number-of-rows)))
+
 (define (get-curve-points diagram curve-name from-date to-date)
   (let ((db #f)
-	(sql (string-append
-	      "SELECT " (date-column diagram)
-	      ", " (columnname diagram curve-name)
-	      " FROM "
-	      (let ((tables (tables diagram)))
-		(if (> (length tables) 1)
-		    (string-append (string-join tables ", ")
-				   " USING (" +record-id-column+ ")")
-		    (car tables)))
-	      " WHERE ("
-	      (date-column diagram) " BETWEEN \"" from-date "\" AND \"" to-date
-	      "\")"
-	      (let ((sql-where (sql-where diagram curve-name)))
-		(if sql-where
-		    (string-append " AND " sql-where)
-		    ""))
-	      " ORDER BY " (date-column diagram))))
+	(sql (get-sql-row-sql
+	      diagram curve-name from-date to-date +diagram-number-of-values+)))
     (dynamic-wind
       (lambda ()
 	(set! db
@@ -324,6 +480,38 @@
 			 (with-output-to-string (lambda () (display (cdr x)))))
 		       row))
 		 "\n"))))
+      (lambda () (dbi-close db)))))
+
+;;; date-row? = #t means return a html table row made of date/time
+(define (get-sxml-table-row diagram curve-name from-date to-date date-row?)
+  (let ((db #f)
+	(sql (get-sql-row-sql
+	      diagram curve-name from-date to-date +table-number-of-columns+)))
+    (dynamic-wind
+      (lambda ()
+	(set! db
+	      (dbi-open
+	       "sqlite3"
+	       (string-append +db-dir+ "/" (dbfile diagram) ".sqlite3"))))
+      (lambda ()
+	(dbi-query db sql)
+	(do ((row (dbi-get_row db)
+		  (dbi-get_row db))
+	     (result `(tr ,(if date-row?
+			       `(th ,diagram)
+			       `(td ,curve-name)))))
+	    ((not row) result)
+	  (set! result
+		(append
+		 result
+		 `((td ,(with-output-to-string
+			  (lambda ()
+			    (display (if date-row?
+					 (humanize-date-string 
+					  (cdr (assoc "date"
+						      row)))
+					 (cdr (assoc "value"
+						     row))))))))))))
       (lambda () (dbi-close db)))))
 
 (define (gnuplot-commands diagram from-date to-date)
@@ -356,6 +544,15 @@
 	   curve-names)
       ""))))
 
+(define (get-sxml-table diagram from-date to-date)
+  (let ((curve-names (curve-names diagram)))
+    (append '(table)
+	    `(,(get-sxml-table-row
+		diagram (first curve-names) from-date to-date #t))
+	    (map (lambda (curve-name)
+		   (get-sxml-table-row diagram curve-name from-date to-date #f))
+		 curve-names))))
+
 (define (plot-svg diagram from-date to-date)
   (let* ((pp (run-with-pipe "r+" "gnuplot"))
 	 (ppin (cadr pp))
@@ -370,4 +567,17 @@
 	#f
 	svg)))
 
-(run-server p-rout-publisher 'http `(#:port 8080 #:addr ,(inet-pton AF_INET "192.168.178.51")))
+(define (tabulate diagram from-date to-date)
+  (with-output-to-string
+    (lambda ()
+      (display "<!DOCTYPE html>\n")
+      (sxml->xml
+       `(html
+	 (@ (lang "en"))
+	 (head)
+	 (body
+	  (div
+	   (@ (style "text-align:center; margin:150px auto 100px auto;"))
+	   ,(get-sxml-table diagram from-date to-date))))))))
+
+(run-server p-rout-publisher 'http `(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+)))
