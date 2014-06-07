@@ -78,7 +78,7 @@
 (define +table-number-of-columns+ 12)
 (define +diagram-number-of-values+ 200)
 
-(define +diagrams+
+(define +output-sets+
   '(("Battery"
      ("logs" ("header" "module_statuses") "header.time_send"
      "" as-diagram)
@@ -198,46 +198,38 @@
       ("Solar"
        "module_statuses.status" "module_statuses.module_id = 12")))))
 
-(define (dbfile diagram)
-  (first (cadr (assoc diagram +diagrams+))))
+(define (dbfile output-set)
+  (first (cadr (assoc output-set +output-sets+))))
 
-(define (diagrams)
-  (map car +diagrams+))
+(define (output-sets)
+  (map car +output-sets+))
 
-(define (tables diagram)
-  (second (cadr (assoc diagram +diagrams+))))
+(define (tables output-set)
+  (second (cadr (assoc output-set +output-sets+))))
 
-(define (date-column diagram)
-  (third (cadr (assoc diagram +diagrams+))))
+(define (date-column output-set)
+  (third (cadr (assoc output-set +output-sets+))))
 
-;;; SQL date column name minus table prefix
-(define (stripped-date-column diagram . dummy)
-  (car (take-right (string-split (date-column diagram) #\.) 1)))
+(define (gnuplot-settings output-set)
+  (fourth (cadr (assoc output-set +output-sets+))))
 
-(define (gnuplot-settings diagram)
-  (fourth (cadr (assoc diagram +diagrams+))))
+(define (render-mode output-set)
+  (fifth (cadr (assoc output-set +output-sets+))))
 
-(define (render-mode diagram)
-  (fifth (cadr (assoc diagram +diagrams+))))
+(define (curve-names output-set)
+  (map car (caddr (assoc output-set +output-sets+))))
 
-(define (curve-names diagram)
-  (map car (caddr (assoc diagram +diagrams+))))
-
-(define (columnname diagram curve-name)
+(define (columnname output-set curve-name)
   (first (cdr (assoc curve-name
-		     (caddr (assoc diagram +diagrams+))))))
+		     (caddr (assoc output-set +output-sets+))))))
 
-;;; SQL column name minus table prefix
-(define (stripped-columnname diagram curve-name)
-  (car (take-right (string-split (columnname diagram curve-name) #\.) 1)))
-
-(define (sql-where diagram curve-name)
+(define (sql-where output-set curve-name)
   (second (cdr (assoc curve-name
-		     (caddr (assoc diagram +diagrams+))))))
+		     (caddr (assoc output-set +output-sets+))))))
 
-(define (curve-style diagram curve-name)
+(define (curve-style output-set curve-name)
   (third (cdr (assoc curve-name
-		     (caddr (assoc diagram +diagrams+))))))
+		     (caddr (assoc output-set +output-sets+))))))
 
 (define (uri-elements request)
   (split-and-decode-uri-path (uri-path (request-uri request))))
@@ -301,13 +293,13 @@
 				     label
 				     "','yyyyMMdd','dropdown',true,'24')"))))))
 
-(define (sxml-diagram-inputs)
-  (map (lambda (diagram)
+(define (sxml-output-set-inputs)
+  (map (lambda (output-set)
 	 `(input (@ (type "radio")
-		    (name "diagram")
-		    (value ,diagram))
-		 ,(string-append diagram " ")))
-       (diagrams)))
+		    (name "output-set")
+		    (value ,output-set))
+		 ,(string-append output-set " ")))
+       (output-sets)))
 
 (define (view-handler request body)
   (values (build-response #:code 200
@@ -330,13 +322,13 @@
 		    (p ,(sxml-date-input +from-label+)
 		       " "
 		       ,(sxml-date-input +to-label+))
-		    (p ,(sxml-diagram-inputs))
+		    (p ,(sxml-output-set-inputs))
 		    (p (input (@ (type "submit")
 				 (value "Go")))))))))))))
 
 (define (view-render-handler request body)
   (let ((render-mode
-	 (render-mode (cdr (assoc "diagram"
+	 (render-mode (cdr (assoc "output-set"
 				  (uri-query-components request))))))
     (cond ((eq? 'as-diagram render-mode)
 	   (view-render-diagram-handler request body))
@@ -353,7 +345,7 @@
      (catch #t
        (lambda ()
 	 (assert
-	  (plot-svg (cdr (assoc "diagram" query-alist))
+	  (plot-svg (cdr (assoc "output-set" query-alist))
 		    (normalize-date-string
 		     (uri-decode (cdr (assoc +from-label+ query-alist))))
 		    (normalize-date-string
@@ -376,7 +368,7 @@
      (catch #t
        (lambda ()
 	 (assert
-	  (tabulate (cdr (assoc "diagram" query-alist))
+	  (tabulate (cdr (assoc "output-set" query-alist))
 		    (normalize-date-string
 		     (uri-decode (cdr (assoc +from-label+ query-alist))))
 		    (normalize-date-string
@@ -431,22 +423,22 @@
       (lambda () (dbi-close db)))))
 
 
-(define (get-sql-row-sql diagram curve-name from-date to-date number-of-rows)
+(define (get-sql-row-sql output-set curve-name from-date to-date number-of-rows)
   (string-append
    "WITH t (id, date, value) AS"
    " (SELECT " +record-id-column+
-   ", " (date-column diagram)
-   ", " (columnname diagram curve-name)
+   ", " (date-column output-set)
+   ", " (columnname output-set curve-name)
    " FROM "
-   (let ((tables (tables diagram)))
+   (let ((tables (tables output-set)))
      (if (> (length tables) 1)
 	 (string-append (string-join tables ", ")
 			" USING (" +record-id-column+ ")")
 	 (car tables)))
    " WHERE ("
-   (date-column diagram) " BETWEEN \"" from-date "\" AND \"" to-date
+   (date-column output-set) " BETWEEN \"" from-date "\" AND \"" to-date
    "\")"
-   (let ((sql-where (sql-where diagram curve-name)))
+   (let ((sql-where (sql-where output-set curve-name)))
      (if sql-where
 	 (string-append " AND " sql-where)
 	 ""))
@@ -456,16 +448,17 @@
    " FROM t) = 0"
    " ORDER BY id LIMIT " (number->string number-of-rows)))
 
-(define (get-curve-points diagram curve-name from-date to-date)
+(define (get-curve-points output-set curve-name from-date to-date)
   (let ((db #f)
-	(sql (get-sql-row-sql
-	      diagram curve-name from-date to-date +diagram-number-of-values+)))
+	(sql (get-sql-row-sql output-set curve-name
+			      from-date to-date
+			      +diagram-number-of-values+)))
     (dynamic-wind
       (lambda ()
 	(set! db
 	      (dbi-open
 	       "sqlite3"
-	       (string-append +db-dir+ "/" (dbfile diagram) ".sqlite3"))))
+	       (string-append +db-dir+ "/" (dbfile output-set) ".sqlite3"))))
       (lambda ()
 	(dbi-query db sql)
 	(do ((row (dbi-get_row db)
@@ -483,22 +476,23 @@
       (lambda () (dbi-close db)))))
 
 ;;; date-row? = #t means return a html table row made of date/time
-(define (get-sxml-table-row diagram curve-name from-date to-date date-row?)
+(define (get-sxml-table-row output-set curve-name from-date to-date date-row?)
   (let ((db #f)
-	(sql (get-sql-row-sql
-	      diagram curve-name from-date to-date +table-number-of-columns+)))
+	(sql (get-sql-row-sql output-set curve-name
+			      from-date to-date
+			      +table-number-of-columns+)))
     (dynamic-wind
       (lambda ()
 	(set! db
 	      (dbi-open
 	       "sqlite3"
-	       (string-append +db-dir+ "/" (dbfile diagram) ".sqlite3"))))
+	       (string-append +db-dir+ "/" (dbfile output-set) ".sqlite3"))))
       (lambda ()
 	(dbi-query db sql)
 	(do ((row (dbi-get_row db)
 		  (dbi-get_row db))
 	     (result `(tr ,(if date-row?
-			       `(th ,diagram)
+			       `(th ,output-set)
 			       `(td ,curve-name)))))
 	    ((not row) result)
 	  (set! result
@@ -514,51 +508,52 @@
 						     row))))))))))))
       (lambda () (dbi-close db)))))
 
-(define (gnuplot-commands diagram from-date to-date)
-  (let ((curve-names (curve-names diagram)))
+(define (gnuplot-commands output-set from-date to-date)
+  (let ((curve-names (curve-names output-set)))
     (string-append
      "set terminal 'svg' enhanced linewidth 2 mouse jsdir '/view/lib/'"
      " size 1200, 800 dynamic fsize 8\n"
      "set encoding utf8\n"
      "set output\n"
      "set key left\n"
-     "set keytitle '{/=12 " diagram "}'\n"	;just a default title
+     "set keytitle '{/=12 " output-set "}'\n" ;just a default title
      "set timefmt '%Y-%m-%dT%H:%M:%S'\n"
      "set format x \"%a\\n%Y-%m-%d\\n%H:%M:%S\"\n"
      "set xdata time\n"
      "set style fill transparent solid 0.2 noborder\n"
-     (gnuplot-settings diagram)
+     (gnuplot-settings output-set)
      "\n"
      "plot "
      (string-join
       (map (lambda (curve-name)
 	     (string-append "'-' using 1:2 title '"
 			    curve-name
-			    "' with "(curve-style diagram curve-name)))
+			    "' with "(curve-style output-set curve-name)))
 	   curve-names)
       ", ")
      "\n"
      (string-join
       (map (lambda (curve-name)
-	     (get-curve-points diagram curve-name from-date to-date))
+	     (get-curve-points output-set curve-name from-date to-date))
 	   curve-names)
       ""))))
 
-(define (get-sxml-table diagram from-date to-date)
-  (let ((curve-names (curve-names diagram)))
+(define (get-sxml-table output-set from-date to-date)
+  (let ((curve-names (curve-names output-set)))
     (append '(table)
 	    `(,(get-sxml-table-row
-		diagram (first curve-names) from-date to-date #t))
+		output-set (first curve-names) from-date to-date #t))
 	    (map (lambda (curve-name)
-		   (get-sxml-table-row diagram curve-name from-date to-date #f))
+		   (get-sxml-table-row output-set curve-name
+				       from-date to-date #f))
 		 curve-names))))
 
-(define (plot-svg diagram from-date to-date)
+(define (plot-svg output-set from-date to-date)
   (let* ((pp (run-with-pipe "r+" "gnuplot"))
 	 (ppin (cadr pp))
 	 (ppout (cddr pp))
 	 (svg #f))
-    (display (gnuplot-commands diagram from-date to-date)
+    (display (gnuplot-commands output-set from-date to-date)
 	     ppout)
     (close ppout)
     (set! svg (read-delimited "" ppin))
@@ -567,7 +562,7 @@
 	#f
 	svg)))
 
-(define (tabulate diagram from-date to-date)
+(define (tabulate output-set from-date to-date)
   (with-output-to-string
     (lambda ()
       (display "<!DOCTYPE html>\n")
@@ -578,6 +573,6 @@
 	 (body
 	  (div
 	   (@ (style "text-align:center; margin:150px auto 100px auto;"))
-	   ,(get-sxml-table diagram from-date to-date))))))))
+	   ,(get-sxml-table output-set from-date to-date))))))))
 
 (run-server p-rout-publisher 'http `(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+)))
