@@ -48,7 +48,8 @@
     (log-dir (value #t))
     (addr (single-char #\a) (value #t))
     (port (single-char #\p) (value #t))
-    (gnuplot-lib-dir (value #t))))
+    (gnuplot-lib-dir (value #t))
+    (no-daemon)))
 
 (define options (getopt-long (command-line) option-spec))
 
@@ -63,6 +64,7 @@
   -a, --addr        Address to listen on
   -p, --port        Port to listen on
   --gnuplot-lib-dir Gnuplot's Javascript directory
+  --no-daemon       Remain in foreground
 ")
   (exit))
 
@@ -73,6 +75,7 @@
 (define +gnuplot-lib-dir+ "/usr/share/gnuplot/4.6/js")
 (define +addr+ (option-ref options 'addr' "192.168.178.51"))
 (define +port+ (option-ref options 'port' 8080))
+(define +no-daemon+ (option-ref options 'no-daemon #f))
 (define +from-label+ "From")
 (define +to-label+ "To")
 (define +table-number-of-columns+ 12)
@@ -266,7 +269,7 @@
   (time-utc->date (add-duration (date->time-utc date)
 				(make-time 'time-duration 0 seconds))))
 
-(define (p-rout-publisher request body)
+(define (p-rout-view request body)
   (cond ((equal? '("view") (uri-elements request))
 	 (view-handler request body))
 	((equal? '("view" "render") (uri-elements request))
@@ -575,4 +578,17 @@
 	   (@ (style "text-align:center; margin:150px auto 100px auto;"))
 	   ,(get-sxml-table output-set from-date to-date))))))))
 
-(run-server p-rout-publisher 'http `(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+)))
+(unless +no-daemon+
+  (let ((pid (primitive-fork)))
+    (cond ((> pid 0)
+	   (display pid) (newline)
+	   (primitive-exit 0))
+	  ((< pid 0)
+	   (primitive-exit 1))
+	  (else
+	   (umask 0)
+	   (setsid)))))
+
+(run-server p-rout-view
+	    'http
+	    `(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+)))

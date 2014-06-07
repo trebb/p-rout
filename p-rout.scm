@@ -88,7 +88,8 @@
     (addr (single-char #\a) (value #t))
     (port (single-char #\p) (value #t))
     (db-dir (value #t))
-    (log-dir (value #t))))
+    (log-dir (value #t))
+    (no-daemon)))
 
 (define options (getopt-long (command-line) option-spec))
 
@@ -102,6 +103,7 @@
   -p, --port     Port to listen on
   --db-dir       Database directory (default: \"log-db\")
   --log-dir      Log directory (default: \"log-db\")
+  --no-daemon    Remain in foreground
 ")
   (exit))
 
@@ -111,6 +113,7 @@
 (define +log-dir+ (option-ref options 'log-dir "log-db"))
 (define +addr+ (option-ref options 'addr "10.11.0.3"))
 (define +port+ (option-ref options 'port 80))
+(define +no-daemon+ (option-ref options 'no-daemon #f))
 
 ;;; The main HTTP handler
 (define (p-rout-collector request body)
@@ -323,16 +326,18 @@
 		(add-row db db-name table names values next-id))))))
        tablenames))
     (logged-query db "db" "COMMIT TRANSACTION")))
-	  
-	  
-;; (define db-obj (dbi-open "sqlite3" "my-example-db"))
-;; (dbi-query db-obj "CREATE TABLE IF NOT EXISTS blahblah (id INTEGER)")
-;; (dbi-query db-obj "ALTER TABLE blahblah ADD COLUMN xxx1")
-;; (dbi-query db-obj "SELECT * FROM blahblah")
-;; (dbi-get_status db-obj)
-;; (dbi-get_row db-obj)
-;; (dbi-close db-obj)
 
+(unless +no-daemon+
+  (let ((pid (primitive-fork)))
+    (cond ((> pid 0)
+	   (display pid) (newline)
+	   (primitive-exit 0))
+	  ((< pid 0)
+	   (primitive-exit 1))
+	  (else
+	   (umask 0)
+	   (setsid)))))
 
 (run-server p-rout-collector
-	    'http `(#:port +port+ #:addr ,(inet-pton AF_INET +addr+)))
+	    'http
+	    `(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+)))
