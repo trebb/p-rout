@@ -78,19 +78,21 @@
 (define +no-daemon+ (option-ref options 'no-daemon #f))
 (define +from-label+ "From")
 (define +to-label+ "To")
-(define +table-number-of-columns+ 12)
-(define +diagram-number-of-values+ 200)
+(define +table-number-of-columns+ 80)
+(define +diagram-number-of-values+ 400)
 
 (define +output-sets+
   '(("Battery"
      ("logs" ("header" "module_statuses") "header.time_send"
      "" as-diagram)
-     (("I_{charge}"
-       "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
-      ("v_{charge}"
+     (;; ("I_{charge}"
+      ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("V_{charge}"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
-      ("I_{discharge}" 
-       "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("I_{batt}"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green' smooth bezier")
+      ;; ("I_{discharge}" 
+      ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
       ("V_{discharge}" 
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
       ("V_{batt}" 
@@ -112,7 +114,7 @@
      ("logs" ("header" "module_statuses") "header.time_send"
       "set keytitle '{/=12 Power}'\n" as-diagram)
      (("P_{batt}"
-       "module_statuses.param_2" "module_statuses.module_id = 136" "lines smooth bezier")
+       "module_statuses.param_2" "module_statuses.module_id = 136" "lines lw 3 lc rgb 'green' smooth bezier")
       ("P_{local}"
        "module_statuses.param_6" "module_statuses.module_id = 9" "lines smooth bezier")
       ("P_{grid_{dcac}}"
@@ -120,13 +122,13 @@
       ("P_{grid_{platform}}"
        "module_statuses.param_3" "module_statuses.module_id = 16" "lines smooth bezier")
       ("P_{solar}"
-       "module_statuses.param_10" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 3 lc rgb 'red' smooth bezier")
       ("P_{L1}"
-       "module_statuses.param_2" "module_statuses.module_id = 11" "lines smooth bezier")
+       "module_statuses.param_2" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
       ("P_{L2}"
-       "module_statuses.param_6" "module_statuses.module_id = 11" "lines smooth bezier")
+       "module_statuses.param_6" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red' smooth bezier")
       ("P_{L3}"
-       "module_statuses.param_10" "module_statuses.module_id = 11" "lines smooth bezier")))
+       "module_statuses.param_10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet' smooth bezier")))
     ("Voltage"
      ("logs" ("header" "module_statuses") "header.time_send"
       "set keytitle '{/=12 AC Voltage}'\nset yrange [220:240]\n" as-diagram)
@@ -137,11 +139,11 @@
       ("V_{grid_{platform}}"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16" "lines smooth bezier")
       ("V_{L1}"
-       "module_statuses.param_0 / 10" "module_statuses.module_id = 11" "lines smooth bezier")
+       "module_statuses.param_0 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
       ("V_{L2}"
-       "module_statuses.param_4 / 10" "module_statuses.module_id = 11" "lines smooth bezier")
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red' smooth bezier")
       ("V_{L3}"
-       "module_statuses.param_8 / 10" "module_statuses.module_id = 11" "lines smooth bezier")))
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet' smooth bezier")))
     ("Frequency"
      ("logs" ("header" "module_statuses") "header.time_send"
       "" as-diagram)
@@ -153,15 +155,15 @@
      ("logs" ("header" "module_statuses") "header.time_send"
       "set keytitle '{/=12 Temperature}'\n" as-diagram)
      (("T_{dcac}"
-       "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines lc rgb 'blue' smooth bezier")
       ("T_{platform}"
-       "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines smooth bezier")
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green' smooth bezier")
       ("T_{batt}"
-       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 3 lc rgb 'green' smooth bezier")
       ("T_{batt_{module}}"
-       "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
       ("T_{solar}"
-       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines smooth bezier")))
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")))
     ("Energy"
      ("logs" ("header" "module_statuses") "header.time_send"
       "" as-table)
@@ -199,7 +201,12 @@
       ("Battery"
        "module_statuses.status" "module_statuses.module_id = 136")
       ("Solar"
-       "module_statuses.status" "module_statuses.module_id = 12")))))
+       "module_statuses.status" "module_statuses.module_id = 12")))
+    ("Events"
+     ("events" ("header" "event") "header.time_send"
+      "Raw event strings" as-table)
+     (("Event"
+       "event.data" #f)))))
 
 (define (dbfile output-set)
   (first (cadr (assoc output-set +output-sets+))))
@@ -314,8 +321,8 @@
 	      (display "<!DOCTYPE html>\n")
 	      (sxml->xml
 	       `(html
-		 (@ (lang "en"))
 		 (head
+		  (title "p-rout")
 		  (script (@ (src "/view/lib/datetimepicker_css.js")) ""))
 		 (body
 		  (div
@@ -478,8 +485,8 @@
 		 "\n"))))
       (lambda () (dbi-close db)))))
 
-;;; date-row? = #t means return a html table row made of date/time
-(define (get-sxml-table-row output-set curve-name from-date to-date date-row?)
+;;; date-column? = #t means return an html table column made of date/time
+(define (get-sxml-table-column output-set curve-name from-date to-date date-column?)
   (let ((db #f)
 	(sql (get-sql-row-sql output-set curve-name
 			      from-date to-date
@@ -492,23 +499,23 @@
 	       (string-append +db-dir+ "/" (dbfile output-set) ".sqlite3"))))
       (lambda ()
 	(dbi-query db sql)
-	(do ((row (dbi-get_row db)
+	(do ((sql-row (dbi-get_row db)
 		  (dbi-get_row db))
-	     (result `(tr ,(if date-row?
-			       `(th ,output-set)
-			       `(td ,curve-name)))))
-	    ((not row) result)
+	     (result `( ,(if date-column?
+			     `(th ,output-set)
+			     `(td ,curve-name)))))
+	    ((not sql-row) result)
 	  (set! result
 		(append
 		 result
 		 `((td ,(with-output-to-string
 			  (lambda ()
-			    (display (if date-row?
+			    (display (if date-column?
 					 (humanize-date-string 
 					  (cdr (assoc "date"
-						      row)))
+						      sql-row)))
 					 (cdr (assoc "value"
-						     row))))))))))))
+						     sql-row))))))))))))
       (lambda () (dbi-close db)))))
 
 (define (gnuplot-commands output-set from-date to-date)
@@ -523,7 +530,7 @@
      "set timefmt '%Y-%m-%dT%H:%M:%S'\n"
      "set format x \"%a\\n%Y-%m-%d\\n%H:%M:%S\"\n"
      "set xdata time\n"
-     "set style fill transparent solid 0.2 noborder\n"
+     "set style fill transparent solid 0.1 noborder\n"
      (gnuplot-settings output-set)
      "\n"
      "plot "
@@ -531,7 +538,7 @@
       (map (lambda (curve-name)
 	     (string-append "'-' using 1:2 title '"
 			    curve-name
-			    "' with "(curve-style output-set curve-name)))
+			    "' with " (curve-style output-set curve-name)))
 	   curve-names)
       ", ")
      "\n"
@@ -542,14 +549,19 @@
       ""))))
 
 (define (get-sxml-table output-set from-date to-date)
-  (let ((curve-names (curve-names output-set)))
-    (append '(table)
-	    `(,(get-sxml-table-row
-		output-set (first curve-names) from-date to-date #t))
-	    (map (lambda (curve-name)
-		   (get-sxml-table-row output-set curve-name
-				       from-date to-date #f))
-		 curve-names))))
+  (let* ((row-names (curve-names output-set))
+	 (row-lists
+	  (append
+	   `(,(get-sxml-table-column
+	       output-set (first row-names) from-date to-date #t))
+	   (map (lambda (row-name)
+		  (get-sxml-table-column output-set row-name
+					 from-date to-date #f))
+		row-names))))
+    (cons 'table (apply map
+			(lambda (. table-cells)
+			  (cons 'tr table-cells))
+			row-lists))))
 
 (define (plot-svg output-set from-date to-date)
   (let* ((pp (run-with-pipe "r+" "gnuplot"))
@@ -571,11 +583,13 @@
       (display "<!DOCTYPE html>\n")
       (sxml->xml
        `(html
-	 (@ (lang "en"))
-	 (head)
+	 (head
+	  (title ,output-set)
+	  (style "table {border-collapse: collapse;}"
+	    "td {border: 1px solid black; font-family: monospace;}"))
 	 (body
 	  (div
-	   (@ (style "text-align:center; margin:150px auto 100px auto;"))
+	   (@ (style "text-align:center; margin:auto auto 50px auto;"))
 	   ,(get-sxml-table output-set from-date to-date))))))))
 
 (unless +no-daemon+
