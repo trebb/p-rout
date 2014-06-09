@@ -39,7 +39,8 @@
 	     (ice-9 getopt-long)
 	     (ice-9 pretty-print)
 	     (ice-9 match)
-	     (ice-9 rdelim))
+	     (ice-9 rdelim)
+	     (ice-9 popen))
 
 (define option-spec
   '((help (single-char #\h))
@@ -68,11 +69,19 @@
 ")
   (exit))
 
+(define (gnuplot-version)
+  (second (string-split
+	   (get-string-all (open-pipe "gnuplot --version" OPEN_READ))
+	   #\space)))
+
 (define +record-id-column+ "pur_r_id")
 (define +verbose+ (option-ref options 'verbose #f))
 (define +db-dir+ (option-ref options 'db-dir "log-db"))
 (define +log-dir+ (option-ref options 'log-dir "log-db"))
-(define +gnuplot-lib-dir+ "/usr/share/gnuplot/4.6/js")
+(define +gnuplot-lib-dir+
+  (option-ref options 'gnuplot-lib-dir (string-append "/usr/share/gnuplot/"
+						      (gnuplot-version)
+						      "/js")))
 (define +addr+ (option-ref options 'addr "192.168.178.51"))
 (define +port+ (string->number (option-ref options 'port "80")))
 (define +no-daemon+ (option-ref options 'no-daemon #f))
