@@ -122,7 +122,7 @@
 	(else (not-found-handler request body))))
 
 ;;; Unanticipated access
-(define (not-found-handler request)
+(define (not-found-handler request body)
   (file-log #f "Unexpected request:" request body)
   (values (build-response #:code 404)
 	  (string-append "Not found: "
