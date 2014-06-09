@@ -16,3 +16,11 @@ reviewed on a second HTTP server.
 
 P-rout is intended to be installed on a single-board computer.  It
 currently lacks a decent installation procedure.
+
+
+If there is a configure file, run as usual
+  ./configure && make && make install.
+
+Otherwise, call
+  autoreconf -vif
+first which should create the configure file.

@@ -1,2 +1,6 @@
 *.log
 log-db/
+build-aux/
+*.in
+*.m4
+*.tar.gz
