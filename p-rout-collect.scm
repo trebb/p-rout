@@ -168,7 +168,7 @@
 
 ;;; Put a log entry into file +log-dir+/<basename>.log
 (define (file-log basename . message-parts)
-  (system (string-append "mkdir -p " +log-dir+))
+  (system* "mkdir" "-p" +log-dir+)
   (let ((logfile (string-append +log-dir+ "/" (or basename "unexpected") ".log"))
 	(out #f))
     (dynamic-wind
@@ -280,7 +280,7 @@
   (let ((basename (uri-path->basename uri-path)))
     (if basename
 	(begin
-	  (system (string-append "mkdir -p " +db-dir+))
+	  (system* "mkdir" "-p" +db-dir+)
 	  (let ((dbfile (string-append +db-dir+ "/" basename ".sqlite3"))
 		(db #f))
 	    (dynamic-wind

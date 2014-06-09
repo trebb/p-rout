@@ -427,7 +427,7 @@
 
 
 (define (view-data dbfile table)
-  (system (string-append "mkdir -p " +db-dir+))
+  (system* "mkdir" "-p" +db-dir+)
   (let ((dbfile (string-append +db-dir+ "/" dbfile ".sqlite3"))
 	(db #f))
     (dynamic-wind
