@@ -45,10 +45,10 @@
 (define option-spec
   '((help (single-char #\h))
     (verbose (single-char #\v))
-    (db-dir (value #t))
-    (log-dir (value #t))
     (addr (single-char #\a) (value #t))
     (port (single-char #\p) (value #t))
+    (db-connection (value #t))
+    (log-dir (value #t))
     (gnuplot-lib-dir (value #t))
     (no-daemon)))
 
@@ -60,10 +60,11 @@
  [options]
   -h, --help        Display this help
   -v, --verbose     Display debugging output
-  --db-dir          Database directory (default: \"log-db\")
-  --log-dir         Log directory (default: \"log-db\")
   -a, --addr        Address to listen on
   -p, --port        Port to listen on
+  --db-connection   <user>:<pass>:<db>:<path/ip>[:port] (default:
+                    p-rout:p-rout:p_rout:/run/postgres:localhost)
+  --log-dir         Log directory (default: \"log-v\")
   --gnuplot-lib-dir Gnuplot's Javascript directory
   --no-daemon       Remain in foreground
 ")
@@ -74,10 +75,13 @@
 	   (get-string-all (open-pipe "gnuplot --version" OPEN_READ))
 	   #\space)))
 
-(define +record-id-column+ "pur_r_id")
+(define +record-id-column+ "p_rout_id")
 (define +verbose+ (option-ref options 'verbose #f))
-(define +db-dir+ (option-ref options 'db-dir "log-db"))
-(define +log-dir+ (option-ref options 'log-dir "log-db"))
+(define +db-connection+
+  (option-ref options
+	      'db-connection
+	      "p-rout:p-rout:p_rout:/run/postgres:localhost"))
+(define +log-dir+ (option-ref options 'log-dir "log-v"))
 (define +gnuplot-lib-dir+
   (option-ref options 'gnuplot-lib-dir (string-append "/usr/share/gnuplot/"
 						      (gnuplot-version)
@@ -89,6 +93,7 @@
 (define +to-label+ "To")
 (define +table-number-of-columns+ 80)
 (define +diagram-number-of-values+ 400)
+(define *db* #f)
 
 (define +output-sets+
   '(("Battery"
@@ -217,14 +222,16 @@
      (("Event"
        "event.data" #f)))))
 
-(define (dbfile output-set)
-  (first (cadr (assoc output-set +output-sets+))))
-
 (define (output-sets)
   (map car +output-sets+))
 
+(define (schema output-set)
+  (first (cadr (assoc output-set +output-sets+))))
+
 (define (tables output-set)
-  (second (cadr (assoc output-set +output-sets+))))
+  (map (lambda (table)
+	 (dot-append (schema output-set) table))
+       (second (cadr (assoc output-set +output-sets+)))))
 
 (define (date-column output-set)
   (third (cadr (assoc output-set +output-sets+))))
@@ -263,6 +270,51 @@
       '()
       (drop-right (uri-elements request) 1)))
 
+(define (now) (date->string (current-date) "~4"))
+
+(define (dot-append . strings) (string-join strings "."))
+
+;;; Put a log entry into file +log-dir+/<basename>.log
+(define (file-log basename . message-parts)
+  (system* "mkdir" "-p" +log-dir+)
+  (let ((logfile
+	 (string-append +log-dir+ "/" (or basename "unexpected") ".log"))
+	(out #f))
+    (dynamic-wind
+      (lambda () (set! out (open-file logfile "a")))
+      (lambda ()
+	(display (now) out)
+	(for-each
+	 (lambda (part)
+	   (display " " out)
+	   (display part out))
+	 message-parts)
+	(newline out))
+      (lambda () (close out)))))
+
+;;; Send SQL query to database
+;;; ignore-codes are expected database error codes that don't cause
+;;; log entries
+(define (logged-query logfile query . ignore-codes)
+  (when +verbose+
+    (file-log logfile query))
+  (dbi-query *db* query)
+  (match (dbi-get_status *db*)
+    ((code . message)
+     (if (member code `(0 ,@ignore-codes))
+	 #f
+	 (begin
+	   (file-log logfile message)
+	   (cons code message))))
+    (unexpected
+     (file-log logfile "weird status message: " unexpected)
+     unexpected)))
+
+;;; guile-dbd-postgresql v2.1.4 doesn't do anything until we've read
+;;; any previous results
+(define (flush-query)
+  (while (dbi-get_row *db*)))
+
 ;;; Turn query part of URI into an alist
 (define (uri-query-components request)
   (let ((query (uri-query (request-uri request))))
@@ -290,7 +342,8 @@
 	 (view-handler request body))
 	((equal? '("view" "render") (uri-elements request))
 	 (view-render-handler request body))
-	((equal? '("view" "lib" "datetimepicker_css.js") (uri-elements request))
+	((equal? '("view" "lib" "datetimepicker_css.js")
+		 (uri-elements request))
 	 (view-lib-datetimepicker-handler request body))
 	((equal? '("view" "lib") (uri-dir-elements request))
 	 (view-lib-handler request body))
@@ -425,38 +478,21 @@
 		(lambda () (read-delimited ""))))
 	    (lambda (err . args) "nothing here"))))
 
-
-(define (view-data dbfile table)
-  (system* "mkdir" "-p" +db-dir+)
-  (let ((dbfile (string-append +db-dir+ "/" dbfile ".sqlite3"))
-	(db #f))
-    (dynamic-wind
-      (lambda () (set! db (dbi-open "sqlite3" dbfile)))
-      (lambda ()
-	(dbi-query db (string-join `("SELECT * FROM" ,table)))
-	(with-output-to-string
-	  (lambda ()
-	    (while (= 0 (car (dbi-get_status db)))
-	      (display (dbi-get_row db))
-	      (newline)))))
-      (lambda () (dbi-close db)))))
-
-
 (define (get-sql-row-sql output-set curve-name from-date to-date number-of-rows)
   (string-append
    "WITH t (id, date, value) AS"
    " (SELECT " +record-id-column+
-   ", " (date-column output-set)
+   ", CAST (" (date-column output-set) " AS timestamp)"
    ", " (columnname output-set curve-name)
    " FROM "
    (let ((tables (tables output-set)))
      (if (> (length tables) 1)
-	 (string-append (string-join tables ", ")
+	 (string-append (string-join tables " JOIN ")
 			" USING (" +record-id-column+ ")")
 	 (car tables)))
    " WHERE ("
-   (date-column output-set) " BETWEEN \"" from-date "\" AND \"" to-date
-   "\")"
+   "CAST (" (date-column output-set) " AS timestamp)"
+   " BETWEEN '" from-date "' AND '" to-date "')"
    (let ((sql-where (sql-where output-set curve-name)))
      (if sql-where
 	 (string-append " AND " sql-where)
@@ -468,67 +504,50 @@
    " ORDER BY id LIMIT " (number->string number-of-rows)))
 
 (define (get-curve-points output-set curve-name from-date to-date)
-  (let ((db #f)
-	(sql (get-sql-row-sql output-set curve-name
+  (let ((sql (get-sql-row-sql output-set curve-name
 			      from-date to-date
 			      +diagram-number-of-values+)))
-    (dynamic-wind
-      (lambda ()
-	(set! db
-	      (dbi-open
-	       "sqlite3"
-	       (string-append +db-dir+ "/" (dbfile output-set) ".sqlite3"))))
-      (lambda ()
-	(dbi-query db sql)
-	(do ((row (dbi-get_row db)
-		  (dbi-get_row db))
-	     (result ""))
-	    ((not row) (string-append result "e\n"))
-	  (set! result
-		(string-append
-		 result
-		 (string-join
-		  (map (lambda (x)
-			 (with-output-to-string (lambda () (display (cdr x)))))
-		       row))
-		 "\n"))))
-      (lambda () (dbi-close db)))))
+    (logged-query "db" sql)
+    (do ((row (dbi-get_row *db*)
+	      (dbi-get_row *db*))
+	 (result ""))
+	((not row) (string-append result "e\n"))
+      (set! result
+	    (string-append
+	     result
+	     (with-output-to-string
+	       (lambda ()
+		 (display (normalize-date-string (cdr (first row))))
+		 (display " ")
+		 (display (cdr (second row)))))
+	     "\n")))))
 
-;;; date-column? = #t means return an html table column made of date/time
-(define (get-sxml-table-column output-set curve-name from-date to-date date-column?)
-  (let ((db #f)
-	(sql (get-sql-row-sql output-set curve-name
+;;; date-column?=#t means return an html table column made of date/time
+(define (get-sxml-table-column
+	 output-set curve-name from-date to-date date-column?)
+  (let ((sql (get-sql-row-sql output-set curve-name
 			      from-date to-date
 			      +table-number-of-columns+)))
-    (dynamic-wind
-      (lambda ()
-	(set! db
-	      (dbi-open
-	       "sqlite3"
-	       (string-append +db-dir+ "/" (dbfile output-set) ".sqlite3"))))
-      (lambda ()
-	(dbi-query db sql)
-	(do ((sql-row (dbi-get_row db)
-		  (dbi-get_row db))
-	     (result `( ,(if date-column?
-			     `(th ,output-set)
-			     `(td ,curve-name)))))
-	    ((not sql-row) result)
-	  (set! result
-		(append
-		 result
-		 `((td ,(with-output-to-string
-			  (lambda ()
-			    (display (if date-column?
-					 (humanize-date-string 
-					  (cdr (assoc "date"
-						      sql-row)))
-					 (cdr (assoc "value"
-						     sql-row))))))))))))
-      (lambda () (dbi-close db)))))
+    (logged-query "db" sql)
+    (do ((sql-row (dbi-get_row *db*)
+		  (dbi-get_row *db*))
+	 (result `( ,(if date-column?
+			 `(th ,output-set)
+			 `(td ,curve-name)))))
+	((not sql-row) result)
+      (set! result
+	    (append
+	     result
+	     `((td ,(with-output-to-string
+		      (lambda ()
+			(display (if date-column?
+				     (cdr (assoc "date"
+						  sql-row))
+				     (cdr (assoc "value"
+						 sql-row)))))))))))))
 
 (define (gnuplot-commands output-set from-date to-date)
-  (let ((curve-names (curve-names output-set)))
+  (let* ((curve-names (curve-names output-set)))
     (string-append
      "set terminal 'svg' enhanced linewidth 2 mouse jsdir '/view/lib/'"
      " size 1200, 800 dynamic fsize 8\n"
@@ -577,6 +596,7 @@
 	 (ppin (cadr pp))
 	 (ppout (cddr pp))
 	 (svg #f))
+    (file-log "gnuplot" (gnuplot-commands output-set from-date to-date))
     (display (gnuplot-commands output-set from-date to-date)
 	     ppout)
     (close ppout)
@@ -612,6 +632,16 @@
 	   (umask 0)
 	   (setsid)))))
 
-(run-server p-rout-view
-	    'http
-	    `(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+)))
+(dynamic-wind
+  (lambda ()
+    (set! *db* (dbi-open "postgresql" +db-connection+))
+    (logged-query "db" "DROP CAST IF EXISTS (text AS numeric)")
+    (flush-query)
+    (logged-query "db" "CREATE CAST (text AS numeric) WITH INOUT AS IMPLICIT")
+    (flush-query))
+  (lambda ()
+    (run-server p-rout-view
+		'http
+		`(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+))))
+  (lambda () (dbi-close *db*)))
+

@@ -46,23 +46,23 @@
 ;;;;  }
 ;;;;
 ;;;; The following will happen:
-;;;;   - Open sqlite3 database foo.
-;;;;   - Store two rows in table_one.
-;;;;       (1) set column1 = 5001, column2 = 1
-;;;;       (2) set column1 = 3, column3 = 1, column4 = 342
-;;;;   - Store one row in table_two.
-;;;;       (1) set column1 = 3, column2 = "2014-04-20T22:09:15+01:00"
-;;;;   - Store one row in third_table.
+;;;;
+;;;;   - Store two rows in foo.table_one.
+;;;;       (1) set column1 = "5001", column2 = "1"
+;;;;       (2) set column1 = "3", column3 = "1", column4 = "342"
+;;;;   - Store one row in foo.table_two.
+;;;;       (1) set column1 = "3", column2 = "2014-04-20T22:09:15+01:00"
+;;;;   - Store one row in foo.third_table.
 ;;;;       (1) set column data = "more stuff"
 ;;;;   - Every table has an additional column whose name is in
 ;;;;     +record-id-column+ which is unique for each record.
-;;;;   - Databases and tables will be created and columns will be
-;;;;     added as necessary.
+;;;;   - Database schemas ("foo" in this example) and tables will be
+;;;;     created and columns will be added as necessary.
 
 ;; On Debian, we may need to
 ;; wget http://download.savannah.gnu.org/releases/guile-json/guile-json-0.3.1.tar.gz,
 ;; wget http://download.gna.org/guile-dbi/guile-dbi-2.1.5.tar.gz,
-;; wget http://download.gna.org/guile-dbi/guile-dbd-sqlite3-2.1.4.tar.gz,
+;; wget http://download.gna.org/guile-dbi/guile-dbd-postgresql-2.1.4.tar.gz
 ;; ./configure; make; make install, respectively,
 ;; ldconfig,
 ;; and to
@@ -87,7 +87,7 @@
     (verbose (single-char #\v))
     (addr (single-char #\a) (value #t))
     (port (single-char #\p) (value #t))
-    (db-dir (value #t))
+    (db-connection (value #t))
     (log-dir (value #t))
     (no-daemon)))
 
@@ -97,23 +97,28 @@
   (display (car (command-line)))
   (display "\
  [options]
-  -h, --help     Display this help
-  -v, --verbose  Display debugging output
-  -a, --addr     Address to listen on
-  -p, --port     Port to listen on
-  --db-dir       Database directory (default: \"log-db\")
-  --log-dir      Log directory (default: \"log-db\")
-  --no-daemon    Remain in foreground
+  -h, --help      Display this help
+  -v, --verbose   Display debugging output
+  -a, --addr      Address to listen on
+  -p, --port      Port to listen on
+  --db-connection <user>:<pass>:<db>:<path/ip>[:port] (default:
+                    p-rout:p-rout:p_rout:/run/postgres:localhost)
+  --log-dir       Log directory (default: \"log\")
+  --no-daemon     Remain in foreground
 ")
   (exit))
 
-(define +record-id-column+ "pur_r_id")
+(define +record-id-column+ "p_rout_id")
 (define +verbose+ (option-ref options 'verbose #f))
-(define +db-dir+ (option-ref options 'db-dir "log-db"))
-(define +log-dir+ (option-ref options 'log-dir "log-db"))
+(define +db-connection+
+  (option-ref options
+	      'db-connection
+	      "p-rout:p-rout:p_rout:/run/postgres:localhost"))
+(define +log-dir+ (option-ref options 'log-dir "log"))
 (define +addr+ (option-ref options 'addr "10.11.0.3"))
 (define +port+ (string->number (option-ref options 'port "80")))
 (define +no-daemon+ (option-ref options 'no-daemon #f))
+(define *db* #f)
 
 ;;; The main HTTP handler
 (define (p-rout-collector request body)
@@ -131,7 +136,8 @@
 ;;; The purpose of this HTTP server
 (define (json-handler request body)
   (when +verbose+
-    (file-log "json-handler" "Handling request " request (utf8->string body)))
+    (file-log
+     "json-handler" "Handling request " request (utf8->string body)))
   (store-record (uri-path (request-uri request))
 		(json-string->scm (utf8->string body)))
   (values (build-response #:code 201
@@ -169,7 +175,8 @@
 ;;; Put a log entry into file +log-dir+/<basename>.log
 (define (file-log basename . message-parts)
   (system* "mkdir" "-p" +log-dir+)
-  (let ((logfile (string-append +log-dir+ "/" (or basename "unexpected") ".log"))
+  (let ((logfile
+	 (string-append +log-dir+ "/" (or basename "unexpected") ".log"))
 	(out #f))
     (dynamic-wind
       (lambda () (set! out (open-file logfile "a")))
@@ -192,14 +199,16 @@
 
 (define (now) (date->string (current-date) "~4"))
 
+(define (dot-append . strings) (string-join strings "."))
+
 ;;; Send SQL query to database
 ;;; ignore-codes are expected database error codes that don't cause
 ;;; log entries
-(define (logged-query db logfile query . ignore-codes)
+(define (logged-query logfile query . ignore-codes)
   (when +verbose+
-    (file-log logfile query "  sent to  " db))
-  (dbi-query db query)
-  (match (dbi-get_status db)
+    (file-log logfile query))
+  (dbi-query *db* query)
+  (match (dbi-get_status *db*)
     ((code . message)
      (if (member code `(0 ,@ignore-codes))
 	 #f
@@ -210,24 +219,47 @@
      (file-log logfile "weird status message: " unexpected)
      unexpected)))
 
+;;; guile-dbd-postgresql v2.1.4 doesn't do anything until we've read
+;;; any previous results
+(define (flush-query)
+  (while (dbi-get_row *db*)))
+
 ;;; Make a bunch of SQL tables if necessary
-(define (create-tables db db-name tablenames)
+(define (create-tables schema tablenames)
+  (logged-query "db" (string-append "CREATE SCHEMA " schema))
+  (flush-query)
   (for-each
    (lambda (tablename)
-     (logged-query db db-name
+     (logged-query (dot-append schema tablename)
 		   (string-join `("CREATE TABLE IF NOT EXISTS"
-				  ,tablename "(pur_r_id INTEGER)"))))
+				  ,(dot-append schema tablename)
+				  "(" ,+record-id-column+ "integer)")))
+     (flush-query))
    tablenames))
 
+(define (column-names schema table)
+  (logged-query (dot-append schema table)
+		(string-join
+		 `("SELECT * FROM" ,(dot-append schema table) "LIMIT 1")))
+  (let ((result (dbi-get_row *db*)))
+    (flush-query)
+    (if result
+	(map car result)
+	'())))
+
 ;;; Add a bunch of columns to an SQL table
-(define (add-columns db table logfile-basename columnnames)
-  (for-each
-   (lambda (columnname)
-     (logged-query db logfile-basename
-		   (string-join `("ALTER TABLE" ,table
-				  "ADD COLUMN" ,columnname))
-      1))  ; ignore duplicate column name error
-   columnnames))
+(define (add-columns schema table columnnames)
+  (let* ((present-columns (column-names schema table))
+	 (missing-columns (lset-difference
+			   string= columnnames present-columns)))
+    (for-each
+     (lambda (columnname)
+       (logged-query (dot-append schema table)
+		     (string-join `("ALTER TABLE"
+				    ,(dot-append schema table)
+				    "ADD COLUMN" ,columnname "text")))
+       (flush-query))
+     missing-columns)))
 
 ;;; Extract from table-content the set of column names
 (define (columnnames table-content)
@@ -253,7 +285,7 @@
      (list (function (cons "data" something-else))))))
 
 ;;; Add a row to SQL table
-(define (add-row db db-name table columnnames values record-id)
+(define (add-row schema table columnnames values record-id)
   (let ((names (string-join (cons +record-id-column+ columnnames) ", "))
 	(vals (string-join
 	       (map (lambda (val)
@@ -262,9 +294,11 @@
 			  (string-join `("'" ,val "'") "")))
 		    (cons record-id values))
 	       ", ")))
-    (logged-query db (string-append db-name "-" table)
-		  (string-join `("INSERT INTO" ,table
-				 "(" ,names ") VALUES (" ,vals ")")))))
+    (logged-query (dot-append schema table)
+		  (string-join `("INSERT INTO"
+				 ,(dot-append schema table)
+				 "(" ,names ") VALUES (" ,vals ")")))
+    (flush-query)))
 
 ;;; "/some/path/foo.json" -> "foo"
 (define (uri-path->basename uri-path)
@@ -277,55 +311,55 @@
 ;;; Put data from JSON payload into SQL database whose name is derived
 ;;; from uri-path
 (define (store-record uri-path payload)
-  (let ((basename (uri-path->basename uri-path)))
-    (if basename
-	(begin
-	  (system* "mkdir" "-p" +db-dir+)
-	  (let ((dbfile (string-append +db-dir+ "/" basename ".sqlite3"))
-		(db #f))
-	    (dynamic-wind
-	      (lambda () (set! db (dbi-open "sqlite3" dbfile)))
-	      (lambda () (add-record db basename payload))
-	      (lambda () (dbi-close db)))))
+  (let ((schema (uri-path->basename uri-path)))
+    (if schema
+	(add-record schema payload)
 	(file-log #f "Unexpected POST request:" uri-path))))
 
 ;;; Store one record into SQL database
-(define (add-record db db-name json)
+(define (add-record schema json)
   (let ((tablenames (ht->tablenames json)))
-    (create-tables db db-name tablenames)
-    (logged-query db "db" "BEGIN IMMEDIATE TRANSACTION")
+    (create-tables schema tablenames)
+    (logged-query "db" "BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE")
+    (flush-query)
     (let ((next-id
 	   (apply
 	    max 
 	    (map
 	     (lambda (table)
-	       (logged-query db (string-append db-name "-" table)
-			     (string-join `("SELECT max(" ,+record-id-column+
-					    ") AS last_id FROM" ,table)))
-	       (match (dbi-get_row db)
-		 ((("last_id" . latest-row))
-		  (if (number? latest-row)
-		      (+ 1 latest-row)
-		      0))	  
-		 (_ 0)))
+	       (logged-query (dot-append schema table)
+			     (string-join `("SELECT max("
+					    ,+record-id-column+
+					    ") AS last_id FROM"
+					    ,(dot-append schema table))))
+	       (let ((last-id (dbi-get_row *db*)))
+		 (flush-query)
+		 (match last-id
+		   ((("last_id" . latest-row))
+		    (if (number? latest-row)
+			(+ 1 latest-row)
+			0))	  
+		   (_ 0))))
 	     tablenames))))
       (for-each
        (lambda (table)
 	 (let ((table-content (ht->table-content json table)))
-	   (add-columns db table (string-append db-name "-" table)
-			(columnnames table-content))
+	   (add-columns schema
+	   		table
+	   		(columnnames table-content))
 	   (let ((names (map-rows car table-content))
 		 (values (map-rows cdr table-content)))
 	     (match names
 	       (((_ ...) ...)
 		(for-each
 		 (lambda (names values)
-		   (add-row db db-name table names values next-id))
+		   (add-row schema table names values next-id))
 		 names values))
 	       ((_ ...)
-		(add-row db db-name table names values next-id))))))
+		(add-row schema table names values next-id))))))
        tablenames))
-    (logged-query db "db" "COMMIT TRANSACTION")))
+    (logged-query "db" "COMMIT TRANSACTION")
+    (flush-query)))
 
 (unless +no-daemon+
   (let ((pid (primitive-fork)))
@@ -338,6 +372,11 @@
 	   (umask 0)
 	   (setsid)))))
 
-(run-server p-rout-collector
-	    'http
-	    `(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+)))
+(dynamic-wind
+  (lambda () (set! *db* (dbi-open "postgresql" +db-connection+)))
+  (lambda ()
+    (run-server p-rout-collector
+		'http
+		`(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+))))
+  (lambda () (dbi-close *db*)))
+

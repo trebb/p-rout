@@ -11,14 +11,14 @@ who provides another HTTP server where customers can view their data.
 
 This project does basically the same while keeping everything on the
 owner's premises.  It provides a data-collecting HTTP server where the
-Powerrouter can upload.  Data is stored in SQLite databases and can be
-reviewed on a second HTTP server.
+Powerrouter can upload.  Data is stored in a PostgreSQL database and
+can be reviewed on a second HTTP server.
 
 P-rout is intended to be installed on a single-board computer.  It
 currently lacks a decent installation procedure.
 
 
-If there is a configure file, run as usual
+If there is already a configure file, run as usual
   ./configure && make && make install.
 
 Otherwise, call
