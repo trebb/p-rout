@@ -24,3 +24,7 @@ If there is already a configure file, run as usual
 Otherwise, call
   autoreconf -vif
 first which should create the configure file.
+
+P-rout in its default configuration expects a local PostgrSQL database
+named 'p_rout' where user 'p-rout' (password 'p-rout') has
+administrative rights.
