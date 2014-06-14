@@ -114,7 +114,7 @@
       ("T_{batt}" 
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
       ("SOC" 
-       "module_statuses.param_5" "module_statuses.module_id = 136" "filledcurve x1 lc rgb 'green'")))
+       "module_statuses.param_5" "module_statuses.module_id = 136" "filledcurve y1=0 lc rgb 'green'")))
     ("Solar"
      ("logs" ("header" "module_statuses") "header.time_send"
       "set keytitle '{/=12 Solar}'\n" as-diagram)
