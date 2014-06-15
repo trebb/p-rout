@@ -338,6 +338,8 @@
 				(make-time 'time-duration 0 seconds))))
 
 (define (p-rout-view request body)
+  (when +verbose+
+    (file-log "http" request))
   (cond ((equal? '("view") (uri-elements request))
 	 (view-handler request body))
 	((equal? '("view" "render") (uri-elements request))
@@ -592,16 +594,19 @@
 			row-lists))))
 
 (define (plot-svg output-set from-date to-date)
-  (let* ((pp (run-with-pipe "r+" "gnuplot"))
-	 (ppin (cadr pp))
-	 (ppout (cddr pp))
+  (let* ((gp (run-with-pipe "r+" "gnuplot"))
+	 (gp-pid (car gp))
+	 (gp-in (cadr gp))
+	 (gp-out (cddr gp))
 	 (svg #f))
-    (file-log "gnuplot" (gnuplot-commands output-set from-date to-date))
+    (when +verbose+
+      (file-log "gnuplot" (gnuplot-commands output-set from-date to-date)))
     (display (gnuplot-commands output-set from-date to-date)
-	     ppout)
-    (close ppout)
-    (set! svg (read-delimited "" ppin))
-    (close ppin)
+	     gp-out)
+    (close gp-out)
+    (set! svg (read-delimited "" gp-in))
+    (close gp-in)
+    (waitpid gp-pid)
     (if (eof-object? svg)
 	#f
 	svg)))
