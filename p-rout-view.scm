@@ -50,6 +50,7 @@
     (db-connection (value #t))
     (log-dir (value #t))
     (gnuplot-lib-dir (value #t))
+    (lib-dir (value #t))
     (no-daemon)
     (pid-file (value #t))))
 
@@ -67,6 +68,8 @@
                     p-rout:p-rout:p_rout:/run/postgres:localhost)
   --log-dir         Log directory (default: \"log-v\")
   --gnuplot-lib-dir Gnuplot's Javascript directory
+  --lib-dir         p-rout-view's javascript directory (default:
+                      /usr/share/p-rout/)
   --no-daemon       Remain in foreground
   --pid-file        Store daemon's PID here (default:
                       /var/run/p-rout/p-rout-view.pid)
@@ -89,6 +92,7 @@
   (option-ref options 'gnuplot-lib-dir (string-append "/usr/share/gnuplot/"
 						      (gnuplot-version)
 						      "/js")))
+(define +lib-dir+ (option-ref options 'lib-dir "/usr/share/p-rout/"))
 (define +addr+ (option-ref options 'addr "192.168.178.51"))
 (define +port+ (string->number (option-ref options 'port "80")))
 (define +no-daemon+ (option-ref options 'no-daemon #f))
@@ -478,11 +482,15 @@
 			  #:reason-phrase "Ok"
 			  #:headers `((content-type . (text/javascript)) 
 				      (charset . "utf-8")))
-	  (catch #t
-	    (lambda ()
-	      (with-input-from-file (uri-file-name request)
-		(lambda () (read-delimited ""))))
-	    (lambda (err . args) "nothing here"))))
+	  (let ((file-name
+		 (string-append
+		  +lib-dir+ "/" (uri-file-name request))))
+	    (pretty-print file-name)
+	    (catch #t
+	      (lambda ()
+		(with-input-from-file file-name
+		  (lambda () (read-delimited ""))))
+	      (lambda (err . args) "nothing here")))))
 
 (define (get-sql-row-sql output-set curve-name from-date to-date number-of-rows)
   (string-append
