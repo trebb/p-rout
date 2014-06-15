@@ -1,7 +1,13 @@
 *.log
 log-db/
 configure
+config.status
 build-aux/
+autom4te.cache/
+Makefile
 *.in
 *.m4
 *.tar.gz
+archlinux/pkg/
+archlinux/src/
+archlinux/p-rout-git/

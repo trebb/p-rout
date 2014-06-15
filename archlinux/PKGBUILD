@@ -1,0 +1,50 @@
+# Maintainer: Bert Burgemeister <trebbu@googlemail.com>
+pkgname=p-rout-git
+pkgver=defined_below
+pkgrel=1
+pkgdesc="Collect and view data of a Nedap PowerRouter."
+url="https://github.com/trebb/p-rout/"
+arch=('any')
+license=('MIT')
+depends=('guile-lib' 'guile-dbd-postgresql' 'guile-json' 'postgresql' 'gnuplot' 'libcap')
+makedepends=('git')
+install=p-rout.install
+source=("${pkgname}"::'git://github.com/trebb/p-rout.git' 'p-rout-collect.service' 'p-rout-view.service' 'p-rout.tmpfiles.conf')
+md5sums=('SKIP'
+         'c3c14c441205ac323a584e26f7591b45'
+         '61ef171120a76e77587949a6be813e56'
+         '228ba9f9fc5a508d47bdc022031d65d5')
+
+pkgver() {
+  cd $pkgname
+  echo "r$(git rev-list --count HEAD).$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd "$srcdir/$pkgname"
+  autoreconf -vif
+  ./configure --prefix=/usr
+  make
+}
+
+package() {
+  cd "$srcdir/$pkgname"
+  make DESTDIR="$pkgdir/" install
+  install -D -m644 "${srcdir}/p-rout.tmpfiles.conf" \
+    "${pkgdir}/usr/lib/tmpfiles.d/p-rout.conf"
+  install -D -m644 "${srcdir}/p-rout-collect.service" \
+    "${pkgdir}/usr/lib/systemd/system/p-rout-collect.service"
+  install -D -m644 "${srcdir}/p-rout-view.service" \
+    "${pkgdir}/usr/lib/systemd/system/p-rout-view.service"
+  install -D -m644 "${srcdir}/${pkgname}/COPYING" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+  install -D -m644 "${srcdir}/${pkgname}/datetimepicker_css.js" \
+    "${pkgdir}/usr/share/p-rout/datetimepicker_css.js"
+  install -D -m644 "${srcdir}/${pkgname}/README" \
+    "${pkgdir}/usr/share/doc/p-rout/README"
+  install -D -m755 -d "${pkgdir}/usr/share/doc/p-rout/example/"
+  install -D -m644 "${srcdir}/${pkgname}/example/dnsmasq.conf" \
+    "${srcdir}/${pkgname}/example/ens4v1-static" \
+    "${srcdir}/${pkgname}/example/hosts" \
+    "${pkgdir}/usr/share/doc/p-rout/example/"
+}
