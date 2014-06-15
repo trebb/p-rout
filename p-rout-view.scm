@@ -50,7 +50,8 @@
     (db-connection (value #t))
     (log-dir (value #t))
     (gnuplot-lib-dir (value #t))
-    (no-daemon)))
+    (no-daemon)
+    (pid-file (value #t))))
 
 (define options (getopt-long (command-line) option-spec))
 
@@ -67,6 +68,8 @@
   --log-dir         Log directory (default: \"log-v\")
   --gnuplot-lib-dir Gnuplot's Javascript directory
   --no-daemon       Remain in foreground
+  --pid-file        Store daemon's PID here (default:
+                      /var/run/p-rout/p-rout-view.pid)
 ")
   (exit))
 
@@ -89,6 +92,7 @@
 (define +addr+ (option-ref options 'addr "192.168.178.51"))
 (define +port+ (string->number (option-ref options 'port "80")))
 (define +no-daemon+ (option-ref options 'no-daemon #f))
+(define +pid-file+ (option-ref options 'pid-file "/var/run/p-rout/p-rout-view.pid"))
 (define +from-label+ "From")
 (define +to-label+ "To")
 (define +table-number-of-columns+ 80)
@@ -629,7 +633,8 @@
 (unless +no-daemon+
   (let ((pid (primitive-fork)))
     (cond ((> pid 0)
-	   (display pid) (newline)
+	   (with-output-to-file +pid-file+
+	     (lambda () (display pid)))
 	   (primitive-exit 0))
 	  ((< pid 0)
 	   (primitive-exit 1))

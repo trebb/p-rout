@@ -89,7 +89,8 @@
     (port (single-char #\p) (value #t))
     (db-connection (value #t))
     (log-dir (value #t))
-    (no-daemon)))
+    (no-daemon)
+    (pid-file (value #t))))
 
 (define options (getopt-long (command-line) option-spec))
 
@@ -105,6 +106,8 @@
                     p-rout:p-rout:p_rout:/run/postgres:localhost)
   --log-dir       Log directory (default: \"log\")
   --no-daemon     Remain in foreground
+  --pid-file      Store daemon's PID here (default:
+                    /var/run/p-rout/p-rout-collect.pid)
 ")
   (exit))
 
@@ -118,6 +121,7 @@
 (define +addr+ (option-ref options 'addr "10.11.0.3"))
 (define +port+ (string->number (option-ref options 'port "80")))
 (define +no-daemon+ (option-ref options 'no-daemon #f))
+(define +pid-file+ (option-ref options 'pid-file "/var/run/p-rout/p-rout-collect.pid"))
 (define *db* #f)
 
 ;;; The main HTTP handler
@@ -364,7 +368,8 @@
 (unless +no-daemon+
   (let ((pid (primitive-fork)))
     (cond ((> pid 0)
-	   (display pid) (newline)
+	   (with-output-to-file +pid-file+
+	     (lambda () (display pid)))
 	   (primitive-exit 0))
 	  ((< pid 0)
 	   (primitive-exit 1))
