@@ -11,9 +11,15 @@ depends=('guile-lib' 'guile-dbd-postgresql' 'guile-json' \
 makedepends=('git')
 install=p-rout.install
 source=("${pkgname}"::'git://github.com/trebb/p-rout.git' \
-        'p-rout-collect.service' 'p-rout-view.service' 'p-rout.tmpfiles.conf')
+        'p-rout-collect.service' \
+        'p-rout-view.service' \
+        'p-rout-dump.timer' \
+	'p-rout-dump.service' \
+        'p-rout.tmpfiles.conf')
 md5sums=('SKIP'
  	 'SKIP'
+	 'SKIP'
+	 'SKIP'
 	 'SKIP'
 	 'SKIP')
 
@@ -32,21 +38,33 @@ build() {
 package() {
   cd "$srcdir/$pkgname"
   make DESTDIR="$pkgdir/" install
-  install -D -m644 "${srcdir}/p-rout.tmpfiles.conf" \
+  install -D -m644 \
+    "${srcdir}/p-rout.tmpfiles.conf" \
     "${pkgdir}/usr/lib/tmpfiles.d/p-rout.conf"
-  install -D -m644 "${srcdir}/p-rout-collect.service" \
+  install -D -m644 \
+    "${srcdir}/p-rout-collect.service" \
     "${pkgdir}/usr/lib/systemd/system/p-rout-collect.service"
-  install -D -m644 "${srcdir}/p-rout-view.service" \
+  install -D -m644 \
+    "${srcdir}/p-rout-view.service" \
     "${pkgdir}/usr/lib/systemd/system/p-rout-view.service"
-  install -D -m644 "${srcdir}/${pkgname}/COPYING" \
+  install -D -m644 \
+    "${srcdir}/p-rout-dump.service" \
+    "${pkgdir}/usr/lib/systemd/system/p-rout-dump.service"
+  install -D -m644 \
+    "${srcdir}/${pkgname}/COPYING" \
     "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
-  install -D -m644 "${srcdir}/${pkgname}/datetimepicker_css.js" \
+  install -D -m644 \
+    "${srcdir}/${pkgname}/datetimepicker_css.js" \
     "${pkgdir}/usr/share/p-rout/datetimepicker_css.js"
-  install -D -m644 "${srcdir}/${pkgname}/README" \
+  install -D -m644 \
+    "${srcdir}/${pkgname}/README" \
     "${pkgdir}/usr/share/doc/p-rout/README"
   install -D -m755 -d "${pkgdir}/usr/share/doc/p-rout/example/"
-  install -D -m644 "${srcdir}/${pkgname}/example/dnsmasq.conf" \
+  install -D -m644 \
+    "${srcdir}/${pkgname}/example/dnsmasq.conf" \
     "${srcdir}/${pkgname}/example/ens4v1_static" \
     "${srcdir}/${pkgname}/example/hosts" \
     "${pkgdir}/usr/share/doc/p-rout/example/"
+  install -D -m755 -d "${pkgdir}/var/lib/p-rout/example/"
+
 }

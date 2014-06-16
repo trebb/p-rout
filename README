@@ -63,7 +63,7 @@ Configuration (on Arch Linux)
     accordingly and rename the file to reflect the new interface name.
     Run
 
-      netctl enable ens4v1
+      netctl enable ens4v1,
       netctl start ens4v1.
 
 (6) Connect the second network interface to your LAN. Configure it and
@@ -88,9 +88,11 @@ Configuration (on Arch Linux)
 
     to learn about other options.  If done, run
 
-      systemctl enable p-rout-collect p-rout-view
-      systemctl start p-rout-collect p-rout-view.
+      systemctl enable p-rout-collect p-rout-view p-rout-dump.timer,
+      systemctl start p-rout-collect p-rout-view p-rout-dump.timer.
 
 (8) Point your browser to http://192.168.178.1/view.  Enjoy.
     
-
+(9) You may want to copy dumps of p-rout's collected data to a safe
+    place.  The dumps are created daily in /var/lib/p-rout/ and get
+    deleted once they are older than 14 days.
