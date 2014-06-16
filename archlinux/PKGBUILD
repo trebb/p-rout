@@ -46,7 +46,7 @@ package() {
     "${pkgdir}/usr/share/doc/p-rout/README"
   install -D -m755 -d "${pkgdir}/usr/share/doc/p-rout/example/"
   install -D -m644 "${srcdir}/${pkgname}/example/dnsmasq.conf" \
-    "${srcdir}/${pkgname}/example/ens4v1-static" \
+    "${srcdir}/${pkgname}/example/ens4v1_static" \
     "${srcdir}/${pkgname}/example/hosts" \
     "${pkgdir}/usr/share/doc/p-rout/example/"
 }
