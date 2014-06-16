@@ -15,16 +15,82 @@ PowerRouter can upload.  Data is stored in a PostgreSQL database and
 can be reviewed on a second HTTP server.
 
 P-rout is intended to be installed (but not yet tested) on a
-single-board computer.
+single-board computer with two network interfaces.
 
 
-If there is already a configure file, run as usual
+Installation
+============
+
+If you are on Arch Linux, cd archlinux and follow the README there.
+
+If not on ArchLinux and there is already a configure file, run as
+usual
+
   ./configure && make && make install.
 
 Otherwise, call
+
   autoreconf -vif
+
 first which should create the configure file.
 
-P-rout in its default configuration expects a local PostgreSQL
-database named 'p_rout' where user 'p-rout' (password 'p-rout') has
-administrative rights.
+
+Configuration (on Arch Linux)
+=============================
+
+(1) P-rout in its default configuration expects a local PostgreSQL
+    database named 'p_rout' where user 'p-rout' (password 'p-rout')
+    has administrative rights.
+
+(2) Connect the PowerRouter to a dedicated Network interface and find
+    out the name of the interface.  (Let's suppose it's called
+    ens4v1.)
+
+(3) Copy ./example/hosts over /etc/hosts
+
+(4) Use ./example/dnsmasq.conf as a template for /etc/dnsmasq.conf.
+    Edit the line that says
+
+      interface=ens4v1
+
+    accordingly.
+
+(5) Use ./example/ens4v1_static as a template for
+    /etc/netctl/ens4v1_static.  Edit the line that says
+
+      Interface=ens4v1
+
+    accordingly and rename the file to reflect the new interface name.
+    Run
+
+      netctl enable ens4v1
+      netctl start ens4v1.
+
+(6) Connect the second network interface to your LAN. Configure it and
+    find out its IP number. (Let's suppose it's 192.168.178.1)
+
+(7) In /usr/lib/systemd/system/p-rout-view.service edit the line that
+    says
+
+      ExecStart=/usr/bin/p-rout-view.scm
+
+    into something like
+
+      ExecStart=/usr/bin/p-rout-view.scm --address=192.168.178.1
+
+    or perhaps
+
+      ExecStart=/usr/bin/p-rout-view.scm --address=192.168.178.1 --port=8080
+
+    using the IP from (6).  Call
+
+      p-rout-view.scm --help
+
+    to learn about other options.  If done, run
+
+      systemctl enable p-rout-collect p-rout-view
+      systemctl start p-rout-collect p-rout-view.
+
+(8) Point your browser to http://192.168.178.1/view.  Enjoy.
+    
+

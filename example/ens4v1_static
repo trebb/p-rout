@@ -1,0 +1,6 @@
+Description='The whole internet as PowerRouter sees it'
+Interface=ens4v1
+Connection=ethernet
+IP=static
+Address=('10.11.0.3/16')
+DNS=('10.11.0.3')
