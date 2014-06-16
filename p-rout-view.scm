@@ -122,7 +122,7 @@
       ("T_{batt}" 
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
       ("SOC" 
-       "module_statuses.param_5" "module_statuses.module_id = 136" "filledcurve y1=0 lc rgb 'green'")))
+       "module_statuses.param_5" "module_statuses.module_id = 136" "filledcurve y1=50 lw .2 lc rgb 'green'")))
     ("Solar"
      ("logs" ("header" "module_statuses") "header.time_send"
       "set keytitle '{/=12 Solar}'\n" as-diagram)
@@ -485,7 +485,6 @@
 	  (let ((file-name
 		 (string-append
 		  +lib-dir+ "/" (uri-file-name request))))
-	    (pretty-print file-name)
 	    (catch #t
 	      (lambda ()
 		(with-input-from-file file-name
@@ -572,7 +571,7 @@
      "set timefmt '%Y-%m-%dT%H:%M:%S'\n"
      "set format x \"%a\\n%Y-%m-%d\\n%H:%M:%S\"\n"
      "set xdata time\n"
-     "set style fill transparent solid 0.1 noborder\n"
+     "set style fill transparent solid 0.1\n"
      (gnuplot-settings output-set)
      "\n"
      "plot "
