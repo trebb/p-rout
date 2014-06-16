@@ -38,33 +38,37 @@ build() {
 package() {
   cd "$srcdir/$pkgname"
   make DESTDIR="$pkgdir/" install
+
   install -D -m644 \
     "${srcdir}/p-rout.tmpfiles.conf" \
     "${pkgdir}/usr/lib/tmpfiles.d/p-rout.conf"
-  install -D -m644 \
+
+  install -m755 -d "${pkgdir}/usr/lib/systemd/system/"
+  install -m644 \
     "${srcdir}/p-rout-collect.service" \
-    "${pkgdir}/usr/lib/systemd/system/p-rout-collect.service"
-  install -D -m644 \
     "${srcdir}/p-rout-view.service" \
-    "${pkgdir}/usr/lib/systemd/system/p-rout-view.service"
-  install -D -m644 \
     "${srcdir}/p-rout-dump.service" \
-    "${pkgdir}/usr/lib/systemd/system/p-rout-dump.service"
+    "${srcdir}/p-rout-dump.timer" \
+    "${pkgdir}/usr/lib/systemd/system/"
+
   install -D -m644 \
     "${srcdir}/${pkgname}/COPYING" \
     "${pkgdir}/usr/share/licenses/${pkgname}/COPYING"
+
   install -D -m644 \
     "${srcdir}/${pkgname}/datetimepicker_css.js" \
     "${pkgdir}/usr/share/p-rout/datetimepicker_css.js"
+
   install -D -m644 \
     "${srcdir}/${pkgname}/README" \
     "${pkgdir}/usr/share/doc/p-rout/README"
-  install -D -m755 -d "${pkgdir}/usr/share/doc/p-rout/example/"
-  install -D -m644 \
+
+  install -m755 -d "${pkgdir}/usr/share/doc/p-rout/example/"
+  install -m644 \
     "${srcdir}/${pkgname}/example/dnsmasq.conf" \
     "${srcdir}/${pkgname}/example/ens4v1_static" \
     "${srcdir}/${pkgname}/example/hosts" \
     "${pkgdir}/usr/share/doc/p-rout/example/"
-  install -D -m755 -d "${pkgdir}/var/lib/p-rout/example/"
 
+  install -m755 -d "${pkgdir}/var/lib/p-rout/"
 }
