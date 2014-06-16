@@ -3,7 +3,7 @@ Description=Dump p-rout SQL data
 
 [Timer]
 OnCalendar=*-*-* 00:00:00
-AccuracySec=1us
+AccuracySec=1h
 Persistent=true
 
 [Install]
