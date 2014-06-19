@@ -1,3 +1,3 @@
-This directory contains two files with different representations of
-the same original data, so we can guess how to map identifiers like
+This directory contains pairs of files with different representations
+of the same original data, so we can guess how to map identifiers like
 "param_0" to names like "grid frequency".
