@@ -495,7 +495,7 @@
   (string-append
    "WITH t (id, date, value) AS"
    " (SELECT " +record-id-column+
-   ", CAST (" (date-column output-set) " AS timestamp)"
+   ", " (date-column output-set)
    ", " (columnname output-set curve-name)
    " FROM "
    (let ((tables (tables output-set)))
@@ -504,7 +504,7 @@
 			" USING (" +record-id-column+ ")")
 	 (car tables)))
    " WHERE ("
-   "CAST (" (date-column output-set) " AS timestamp)"
+   (date-column output-set)
    " BETWEEN '" from-date "' AND '" to-date "')"
    (let ((sql-where (sql-where output-set curve-name)))
      (if sql-where
@@ -530,7 +530,7 @@
 	     result
 	     (with-output-to-string
 	       (lambda ()
-		 (display (normalize-date-string (cdr (first row))))
+		 (display (cdr (first row)))
 		 (display " ")
 		 (display (cdr (second row)))))
 	     "\n")))))
