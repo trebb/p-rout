@@ -1,4 +1,5 @@
 Packaging for Arch Linux
+========================
 
 (1) Run updpkgsums in this directory.
 
@@ -9,3 +10,56 @@ Packaging for Arch Linux
 Both (1) and (2) will alter the PKGBUILD file.  Ignore/revert these
 changes before committing to git.
     
+
+Installing on Arch Linux
+========================
+
+(1) Install dependencies:
+
+      pacman -S base-devel wget postgresql dnsmasq gnuplot
+
+(2) Create a user:
+
+      useradd -m p-rout
+      passwd p-rout
+      visudo
+
+        in visudo add the following line:
+	  p-rout ALL=(ALL) ALL
+
+(3) Initialize PostgreSQL:
+
+      su postgres
+      initdb -D /var/lib/postgres/data
+      ^D
+
+(4) Start PostgreSQL:
+
+      systemctl start postgresql
+      systemctl enable postgresql
+
+(5) Create database and user:
+
+      su postgres
+      createdb p_rout
+      createuser -sP p-rout
+        (set password=p-rout)
+      ^D
+
+(6) Get packages from AUR:
+
+      su p-rout
+      wget https://aur.archlinux.org/packages/gu/guile-dbi/guile-dbi.tar.gz
+      wget https://aur.archlinux.org/packages/gu/guile-dbd-postgresql/guile-dbd-postgresql.tar.gz
+      wget https://aur.archlinux.org/packages/gu/guile-lib/guile-lib.tar.gz
+      wget https://aur.archlinux.org/packages/gu/guile-json/guile-json.tar.gz
+      wget https://aur.archlinux.org/packages/p-/p-rout-git/p-rout-git.tar.gz
+
+(7) Unpack tar files from (6):
+
+      tar -xzf <package>.tar.gz
+
+(8) Build and install the packages:
+
+      cd <package>
+      makepkg -Ai
