@@ -100,3 +100,10 @@ Configuration (on Arch Linux)
 (9) You may want to copy dumps of p-rout's collected data to a safe
     place.  The dumps are created daily in /var/lib/p-rout/ and get
     deleted once they are older than 14 days.
+
+
+Bugs
+====
+
+- After a restart of postgresql, both p-rout-collect and p-rout-view
+  need to be restarted too.

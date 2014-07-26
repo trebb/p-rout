@@ -16,7 +16,7 @@ Installing on Arch Linux
 
 (1) Install dependencies:
 
-      pacman -S base-devel wget postgresql dnsmasq gnuplot
+      pacman -S base-devel git wget dnsmasq gnuplot postgresql
 
 (2) Create a user:
 
