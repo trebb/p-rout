@@ -230,7 +230,7 @@
 
 ;;; Make a bunch of SQL tables if necessary
 (define (create-tables schema tablenames)
-  (logged-query "db" (string-append "CREATE SCHEMA " schema))
+  (logged-query "db" (string-append "CREATE SCHEMA IF NOT EXISTS " schema))
   (flush-query)
   (for-each
    (lambda (tablename)
@@ -380,6 +380,7 @@
 (dynamic-wind
   (lambda () (set! *db* (dbi-open "postgresql" +db-connection+)))
   (lambda ()
+    (logged-query "db" "SET client_min_messages = WARNING;")
     (run-server p-rout-collector
 		'http
 		`(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+))))
