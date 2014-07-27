@@ -63,3 +63,26 @@ Installing on Arch Linux
 
       cd <package>
       makepkg -Ai
+
+
+Updating p-rout on Arch Linux
+=============================
+
+(1) You may want to backup /usr/lib/systemd/system/p-rout-view.
+
+(2) Repeat the installation:
+
+      su p-rout
+      rm -rf p-rout-git*
+      wget https://aur.archlinux.org/packages/p-/p-rout-git/p-rout-git.tar.gz
+      tar -xzf p-rout-git.tar.gz
+      cd p-rout-git
+      makepkg -i
+      ^D
+
+(3) Restore /usr/lib/systemd/system/p-rout-view.
+
+(4) Restart the daemons:
+
+      systemctl daemon-reload
+      systemctl restart p-rout-collect p-rout-view
