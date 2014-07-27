@@ -103,6 +103,11 @@
 (define +diagram-number-of-values+ 400)
 (define *db* #f)
 
+(define +db-indexes+			;((schema table column) ...)
+  '(("logs" "header" "p_rout_id")
+    ("logs" "header" "time_send")
+    ("logs" "module_statuses" "p_rout_id")))
+
 (define +output-sets+
   '(("Battery"
      ("logs" ("header" "module_statuses") "header.time_send"
@@ -637,6 +642,36 @@
 	   (@ (style "text-align:center; margin:auto auto 50px auto;"))
 	   ,(get-sxml-table output-set from-date to-date))))))))
 
+;;; Create an index named <schema>.<table>_<column>_index if necessary
+(define (create-index schema table column)
+ (logged-query "db" (string-append
+		     "SELECT "
+		     "t.relname AS table_name, "
+		     "i.relname AS index_name, "
+		     "a.attname AS column_name, "
+		     "n.nspname AS schema "
+		     "FROM "
+		     "pg_namespace n, pg_class t, "
+		     "pg_class i, "
+		     "pg_index ix, "
+		     "pg_attribute a "
+		     "WHERE "
+		     "n.oid = t.relnamespace "
+		     "AND t.oid = ix.indrelid "
+		     "AND i.oid = ix.indexrelid "
+		     "AND a.attrelid = t.oid "
+		     "AND a.attnum = ANY(ix.indkey) "
+		     "AND t.relkind = 'r' "
+		     "AND n.nspname = '" schema "' "
+		     "AND t.relname = '" table "' "
+		     "AND a.attname = '" column "';"))
+ (unless (dbi-get_row *db*)
+   (flush-query)
+   (logged-query "db" (string-append
+		       "CREATE INDEX " table "_" column "_index "
+		       "ON " schema "." table " (" column ");")))
+ (flush-query))
+
 (unless +no-daemon+
   (let ((pid (primitive-fork)))
     (cond ((> pid 0)
@@ -656,6 +691,8 @@
     (flush-query)
     (logged-query "db" "CREATE CAST (text AS numeric) WITH INOUT AS IMPLICIT")
     (flush-query))
+  (for-each (lambda (names) (apply create-index names))
+	    +db-indexes+)
   (lambda ()
     (run-server p-rout-view
 		'http
