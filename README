@@ -38,68 +38,70 @@ first which should create the configure file.
 Configuration (on Arch Linux)
 =============================
 
-(1) P-rout in its default configuration expects a local PostgreSQL
-    database named 'p_rout' where user 'p-rout' (password 'p-rout')
-    has administrative rights.
+(1)  P-rout in its default configuration expects a local PostgreSQL
+     database named 'p_rout' where user 'p-rout' (password 'p-rout')
+     has administrative rights.
 
-(2) Connect your first network interface to your LAN. Configure it and
-    find out its IP number. Make sure the IP number isn't allowed to
-    change. (Let's suppose it's 192.168.178.1)
+(2)  Connect your first network interface to your LAN. Configure it and
+     find out its IP number. Make sure the IP number isn't allowed to
+     change. (Let's suppose it's 192.168.178.1)
 
-(3) Connect the PowerRouter to a dedicated (second) network interface
-    and find out the name of the interface.  (Let's suppose it's
-    called ens4v1.)
+(3)  Connect the PowerRouter to a dedicated (second) network interface
+     and find out the name of the interface.  (Let's suppose it's
+     called ens4v1.)
 
-(4) Use ./example/ens4v1_static as a template for
-    /etc/netctl/ens4v1_static.  Edit the line that says
+(4)  Use ./example/ens4v1_static as a template for
+     /etc/netctl/ens4v1_static.  Edit the line that says
 
-      Interface=ens4v1
+       Interface=ens4v1
 
-    accordingly and rename the file to reflect the new interface name.
-    Run
+     accordingly and rename the file to reflect the new interface name.
+     Run
 
-      netctl enable ens4v1_static,
-      netctl start ens4v1_static.
+       netctl enable ens4v1_static,
+       netctl start ens4v1_static.
 
-(5) Copy ./example/hosts over /etc/hosts.
+(5)  Copy ./example/hosts over /etc/hosts.
 
-(6) Use ./example/dnsmasq.conf as a template for /etc/dnsmasq.conf.
-    Edit the line that says
+(6)  Use ./example/dnsmasq.conf as a template for /etc/dnsmasq.conf.
+     Edit the line that says
 
-      interface=ens4v1
+       interface=ens4v1
 
-    accordingly.  Activate dnsmasq:
+     accordingly.  Activate dnsmasq:
 
-      systemctl enable dnsmasq,
-      systemctl start dnsmasq.
+       systemctl enable dnsmasq,
+       systemctl start dnsmasq.
 
-(7) In /usr/lib/systemd/system/p-rout-view.service edit the line that
-    says
+(7)  (Optional) In /usr/lib/systemd/system/p-rout-view.service edit the
+     line that says
 
-      ExecStart=/usr/bin/p-rout-view.scm
+       ExecStart=/usr/bin/p-rout-view.scm
 
-    into something like
+     into something like
 
-      ExecStart=/usr/bin/p-rout-view.scm --addr=192.168.178.1
+       ExecStart=/usr/bin/p-rout-view.scm --addr=192.168.178.1
 
-    or perhaps
+     or perhaps
 
-      ExecStart=/usr/bin/p-rout-view.scm --addr=192.168.178.1 --port=8080
+       ExecStart=/usr/bin/p-rout-view.scm --addr=192.168.178.1 --port=8080
 
-    using the IP from (2).  Call
+     using the IP from (2).  Call
 
-      p-rout-view.scm --help
+       p-rout-view.scm --help
 
-    to learn about other options.  If done, run
+     to learn about other options.
 
-      systemctl enable p-rout-collect p-rout-view p-rout-dump.timer,
-      systemctl start p-rout-collect p-rout-view p-rout-dump.timer.
+(8)  Start p-rout services:
 
-(8) Point your browser to http://192.168.178.1/view.  Enjoy.
-    
-(9) You may want to copy dumps of p-rout's collected data to a safe
-    place.  The dumps are created daily in /var/lib/p-rout/ and get
-    deleted once they are older than 14 days.
+       systemctl enable p-rout-collect p-rout-view p-rout-dump.timer,
+       systemctl start p-rout-collect p-rout-view p-rout-dump.timer.
+
+(9)  Point your browser to http://192.168.178.1/view.  Enjoy.
+
+(10) You may want to copy dumps of p-rout's collected data to a safe
+     place.  The dumps are created daily in /var/lib/p-rout/ and get
+     deleted once they are older than 14 days.
 
 
 Bugs
