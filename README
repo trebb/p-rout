@@ -73,8 +73,8 @@ Configuration (on Arch Linux)
        systemctl enable dnsmasq,
        systemctl start dnsmasq.
 
-(7)  (Optional) In /usr/lib/systemd/system/p-rout-view.service edit the
-     line that says
+(7)  In /usr/lib/systemd/system/p-rout-view.service edit the line that
+     says
 
        ExecStart=/usr/bin/p-rout-view.scm
 
@@ -97,9 +97,12 @@ Configuration (on Arch Linux)
        systemctl enable p-rout-collect p-rout-view p-rout-dump.timer,
        systemctl start p-rout-collect p-rout-view p-rout-dump.timer.
 
-(9)  Point your browser to http://192.168.178.1/view.  Enjoy.
+(9)  (Optional) Change hostname: put a hostname of your choice into
+     /etc/hostname; reboot.
 
-(10) You may want to copy dumps of p-rout's collected data to a safe
+(10) Point your browser to http://192.168.178.1/view.  Enjoy.
+
+(11) You may want to copy dumps of p-rout's collected data to a safe
      place.  The dumps are created daily in /var/lib/p-rout/ and get
      deleted once they are older than 14 days.
 
