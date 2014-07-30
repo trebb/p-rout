@@ -106,6 +106,10 @@ Configuration (on Arch Linux)
      place.  The dumps are created daily in /var/lib/p-rout/ and get
      deleted once they are older than 14 days.
 
+(12) If you want to load a data dump from an earlier instance of p-route
+     into your fresh installation, do so before (8) by calling
+     
+       zcat <your-sql-dump>.gz | psql -U p-rout p_rout.
 
 Bugs
 ====
