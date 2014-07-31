@@ -108,10 +108,33 @@
     ("logs" "header" "time_send")
     ("logs" "module_statuses" "p_rout_id")))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; +output-sets+: presentation style definitions
+;;;
+;;; An output-set is either a diagram or a table defined like this:
+;;;
+;;; '((<first-output-set-name>
+;;;    (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+;;;     <gnuplot-diagram-title> <as-table-or-as-diagram>)
+;;;    ((<gnuplot-curve1-title>
+;;;      <SQL-value1-column> <SQL-WHERE> <gnuplot-curve1-style>)
+;;;     (<gnuplot-curve2-title>
+;;;      <SQL-value2-column> <SQL-WHERE> <gnuplot-curve2-style>)
+;;;     ...))
+;;;   (<second-output-set-name>
+;;;    (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+;;;     <gnuplot-diagram-title> <as-table-or-as-diagram>)
+;;;    ((<gnuplot-curve1-title>
+;;;      <SQL-value1-column> <SQL-WHERE> <gnuplot-curve1-style>)
+;;;     (<gnuplot-curve2-title>
+;;;      <SQL-value2-column> <SQL-WHERE> <gnuplot-curve2-style>)
+;;;     ...))
+;;;   ...)
 (define +output-sets+
   '(("Battery"
      ("logs" ("header" "module_statuses") "header.time_send"
-     "" as-diagram)
+      "" as-diagram)
      (;; ("I_{charge}"
       ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
       ("V_{charge}"
