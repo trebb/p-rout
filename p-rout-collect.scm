@@ -80,10 +80,19 @@
 	     (ice-9 getopt-long)
 	     (ice-9 pretty-print)
 	     (ice-9 match)
+	     (ice-9 rdelim)
 	     (ice-9 threads))
+
+;;; Return first line of file at path, or return #f
+(define (read-line-from-file path)
+  (catch
+    #t
+    (lambda () (call-with-input-file path (lambda (in) (read-line in))))
+    (lambda (k . args) #f)))
 
 (define option-spec
   '((help (single-char #\h))
+    (version (single-char #\V))
     (verbose (single-char #\v))
     (addr (single-char #\a) (value #t))
     (port (single-char #\p) (value #t))
@@ -99,6 +108,7 @@
   (display "\
  [options]
   -h, --help      Display this help
+  -V, --version   Display version number
   -v, --verbose   Display debugging output
   -a, --addr      Address to listen on
   -p, --port      Port to listen on
@@ -109,6 +119,13 @@
   --pid-file      Store daemon's PID here (default:
                     /var/run/p-rout/p-rout-collect.pid)
 ")
+  (exit))
+
+(when (option-ref options 'version #f)
+  (display (or (read-line-from-file "./VERSION")
+	       (read-line-from-file "/usr/share/p-rout/VERSION")
+	       "unknown"))
+  (newline)
   (exit))
 
 (define +record-id-column+ "p_rout_id")

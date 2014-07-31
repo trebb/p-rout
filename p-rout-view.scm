@@ -42,8 +42,20 @@
 	     (ice-9 rdelim)
 	     (ice-9 popen))
 
+;;; Return first line of file at path, or return #f
+(define (read-line-from-file path)
+  (catch
+    #t
+    (lambda () (call-with-input-file path (lambda (in) (read-line in))))
+    (lambda (k . args) #f)))
+
+(define *version* (or (read-line-from-file "./VERSION")
+		      (read-line-from-file "/usr/share/p-rout/VERSION")
+		      "unknown"))
+
 (define option-spec
   '((help (single-char #\h))
+    (version (single-char #\V))
     (verbose (single-char #\v))
     (addr (single-char #\a) (value #t))
     (port (single-char #\p) (value #t))
@@ -74,6 +86,11 @@
   --pid-file        Store daemon's PID here (default:
                       /var/run/p-rout/p-rout-view.pid)
 ")
+  (exit))
+
+(when (option-ref options 'version #f)
+  (display *version*)
+  (newline)
   (exit))
 
 (define (gnuplot-version)
