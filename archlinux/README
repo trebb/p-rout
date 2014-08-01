@@ -68,7 +68,7 @@ Installing on Arch Linux
 Updating p-rout on Arch Linux
 =============================
 
-(1) You may want to backup /usr/lib/systemd/system/p-rout-view.
+(1) You may want to backup /usr/lib/systemd/system/p-rout-view.service.
 
 (2) Repeat the installation:
 
