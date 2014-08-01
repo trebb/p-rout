@@ -80,8 +80,7 @@
 	     (ice-9 getopt-long)
 	     (ice-9 pretty-print)
 	     (ice-9 match)
-	     (ice-9 rdelim)
-	     (ice-9 threads))
+	     (ice-9 rdelim))
 
 ;;; Return first line of file at path, or return #f
 (define (read-line-from-file path)
