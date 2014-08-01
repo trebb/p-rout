@@ -6,6 +6,7 @@ pkgdesc="Collect and view data of a Nedap PowerRouter."
 url="https://github.com/trebb/p-rout/"
 arch=('any')
 license=('MIT')
+backup=('usr/lib/systemd/system/p-rout-view.service')
 depends=('guile-lib'
          'guile-dbd-postgresql'
 	 'guile-json'
