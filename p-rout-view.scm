@@ -273,7 +273,117 @@
      ("events" ("header" "event") "header.time_send"
       "Raw event strings" as-table)
      (("Event"
-       "event.data" #f)))))
+       "event.data" #f)))
+
+    ("Current Battery"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Battery" as-values)
+     (;; ("I_{charge}"
+      ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
+      ("V_charge"
+       "module_statuses.param_9 / 100" "module_statuses.module_id = 136")
+      ("I_batt"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
+      ;; ("I_{discharge}" 
+      ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
+      ("V_discharge" 
+       "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
+      ("V_batt" 
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
+      ("T_batt" 
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
+      ("SOC" 
+       "module_statuses.param_5" "module_statuses.module_id = 136")))
+    ("Current Solar"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Solar" as-values)
+     (("P"
+       "module_statuses.param_10" "module_statuses.module_id = 12")
+      ("V"
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
+      ("I"
+       "module_statuses.param_6 / 100" "module_statuses.module_id = 12")))
+    ("Current Power"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Power" as-values)
+     (("P_batt"
+       "module_statuses.param_2" "module_statuses.module_id = 136")
+      ("P_local"
+       "module_statuses.param_6" "module_statuses.module_id = 9")
+      ("P_grid_dcac"
+       "module_statuses.param_2" "module_statuses.module_id = 9")
+      ("P_grid_platform"
+       "module_statuses.param_3" "module_statuses.module_id = 16")
+      ("P_solar"
+       "module_statuses.param_10" "module_statuses.module_id = 12")
+      ("P_L1"
+       "module_statuses.param_2" "module_statuses.module_id = 11")
+      ("P_L2"
+       "module_statuses.param_6" "module_statuses.module_id = 11")
+      ("P_L3"
+       "module_statuses.param_10" "module_statuses.module_id = 11")))
+    ("Current Voltage"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Voltage" as-values)
+     (("V_local"
+       "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
+      ("V_grid_dcac"
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
+      ("V_grid_platform"
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
+      ("V_L1"
+       "module_statuses.param_0 / 10" "module_statuses.module_id = 11")
+      ("V_L2"
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 11")
+      ("V_L3"
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 11")))
+    ("Current Frequency"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Frequency" as-values)
+     (("f_dcac"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 9")
+      ("f_platform"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 16")))
+    ("Current Temperature"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Temperature" as-values)
+     (("T_dcac"
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
+      ("T_platform"
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16")
+      ("T_batt"
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
+      ("T_batt_module"
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
+      ("T_solar"
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12")))
+    ("Current Energy"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Energy" as-values)
+     (("Platform consumed"
+       "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
+      ("Platform produced"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
+      ("DC/AC consumed"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
+      ("DC/AC produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
+      ("Local DC/AC consumed"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
+      ("Local DC/AC produced"
+       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
+      ("Battery consumed"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 136")
+      ("Battery produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
+      ("Solar produced"
+       "module_statuses.param_11 / 1000" "module_statuses.module_id = 12")
+      ("L1 consumed"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
+      ("L2 consumed"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 11")
+      ("L3 consumed"
+       "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")))))
 
 (define (output-sets)
   (map car +output-sets+))
@@ -291,6 +401,9 @@
 
 (define (gnuplot-settings output-set)
   (fourth (cadr (assoc output-set +output-sets+))))
+
+(define (table-title output-set)
+  (gnuplot-settings output-set))
 
 (define (render-mode output-set)
   (fifth (cadr (assoc output-set +output-sets+))))
@@ -420,13 +533,26 @@
 				     label
 				     "','yyyyMMdd','dropdown',true,'24')"))))))
 
-(define (sxml-output-set-inputs)
+(define (sxml-output-set-inputs wanted-render-mode)
   (map (lambda (output-set)
 	 `(input (@ (type "radio")
 		    (name "output-set")
 		    (value ,output-set))
 		 ,(string-append output-set " ")))
-       (output-sets)))
+       (filter (lambda (x) (eq? wanted-render-mode (render-mode x)))
+	       (output-sets))))
+
+(define (sxml-latest-value-tables-div)
+  `(div
+    (@ (style "width:80%;" "margin:0 auto;" "text-align:center;"))
+    (h4 "Current Values")
+    ,(map (lambda (output-set)
+	    `(div
+	      '(@ (style "float:left;"))
+	      (h5 ,(table-title output-set))
+	      ,(get-latest-value-sxml-table output-set)))
+	  (filter (lambda (x) (eq? 'as-values (render-mode x)))
+		  (output-sets)))))
 
 (define (view-handler request body)
   (values (build-response #:code 200
@@ -440,18 +566,23 @@
 	       `(html
 		 (head
 		  (title "p-rout")
+		  (style "td {border: 1px solid black;}")
 		  (script (@ (src "/view/lib/datetimepicker_css.js")) ""))
 		 (body
+		  (@ (style "font-family: monospace;"))
 		  (div
-		   (@ (style "text-align:center; margin:150px auto 100px auto;"))
+		   (@ (style "text-align:center;"
+			"margin:150px auto 100px auto;"))
 		   (form
 		    (@ (action "/view/render"))
 		    (p ,(sxml-date-input +from-label+)
 		       " "
 		       ,(sxml-date-input +to-label+))
-		    (p ,(sxml-output-set-inputs))
+		    (p ,(sxml-output-set-inputs 'as-diagram))
+		    (p ,(sxml-output-set-inputs 'as-table))
 		    (p (input (@ (type "submit")
-				 (value "Go")))))))))))))
+				 (value "Go"))))))
+		  ,(sxml-latest-value-tables-div))))))))
 
 (define (view-render-handler request body)
   (let ((render-mode
@@ -536,6 +667,8 @@
 		  (lambda () (read-delimited ""))))
 	      (lambda (err . args) "nothing here")))))
 
+;;; Return a SQL statement that fetches up to number-of-rows (date value) pairs
+;;; for a curve from an output-set and from a time interval
 (define (get-sql-row-sql output-set curve-name from-date to-date number-of-rows)
   (string-append
    "WITH t (id, date, value) AS"
@@ -561,6 +694,25 @@
    " FROM t) = 0"
    " ORDER BY id LIMIT " (number->string number-of-rows)))
 
+;;; Return date of newest data in output-set
+(define (latest-date output-set)
+  (let ((sql
+	 (string-append
+	  "SELECT " (date-column output-set)
+	  " FROM "
+	  (let ((tables (tables output-set)))
+	    (if (> (length tables) 1)
+		(string-append (string-join tables " JOIN ")
+			       " USING (" +record-id-column+ ")")
+		(car tables)))
+	  " ORDER BY " (date-column output-set) " DESC"
+	  " LIMIT 1")))
+    (logged-query "db" sql)
+    (let ((date (cdar (dbi-get_row *db*))))
+      (flush-query)
+      date)))
+
+;;; Return data for one curve the way Gnuplot understands it
 (define (get-curve-points output-set curve-name from-date to-date)
   (let ((sql (get-sql-row-sql output-set curve-name
 			      from-date to-date
@@ -634,6 +786,18 @@
 	   curve-names)
       ""))))
 
+;;; Table of output-set with rows of latest values
+(define (get-latest-value-sxml-table output-set)
+  (let ((date (latest-date output-set)))
+    (cons 'table
+	  (map
+	   (lambda (curve-name)
+	     (cons 'tr
+		   ;; actually, we're getting rows here
+		   (get-sxml-table-column output-set curve-name date date #f)))
+	   (curve-names output-set)))))
+
+;;; Table of output-set with one line per date
 (define (get-sxml-table output-set from-date to-date)
   (let* ((row-names (curve-names output-set))
 	 (row-lists
@@ -679,7 +843,7 @@
 	    "td {border: 1px solid black; font-family: monospace;}"))
 	 (body
 	  (div
-	   (@ (style "text-align:center; margin:auto auto 50px auto;"))
+	   (@ (style "text-align:center;" "margin:auto auto 50px auto;"))
 	   ,(get-sxml-table output-set from-date to-date))))))))
 
 ;;; Create an index named <schema>.<table>_<column>_index if necessary
@@ -727,9 +891,11 @@
 (dynamic-wind
   (lambda ()
     (set! *db* (dbi-open "postgresql" +db-connection+))
-    (logged-query "db" "DROP CAST IF EXISTS (text AS numeric)")
+    (logged-query "db" "DROP CAST IF EXISTS (text AS double precision)")
     (flush-query)
-    (logged-query "db" "CREATE CAST (text AS numeric) WITH INOUT AS IMPLICIT")
+    (logged-query
+     "db"
+     "CREATE CAST (text AS double precision) WITH INOUT AS IMPLICIT")
     (flush-query)
     (for-each (lambda (names) (apply create-index names))
 	      +db-indexes+))
