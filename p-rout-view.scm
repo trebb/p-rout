@@ -570,6 +570,7 @@
 		  (script (@ (src "/view/lib/datetimepicker_css.js")) ""))
 		 (body
 		  (@ (style "font-family: monospace;"))
+		  "p-rout v" ,*version*
 		  (div
 		   (@ (style "text-align:center;"
 			"margin:150px auto 100px auto;"))
