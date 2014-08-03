@@ -499,9 +499,20 @@
   (date->string (string->date date-string-with-a-t "~Y-~m-~dT~H:~M")
 		"~Y-~m-~d ~H:~M"))
 
-(define (date-plus-seconds date seconds)
-  (time-utc->date (add-duration (date->time-utc date)
-				(make-time 'time-duration 0 seconds))))
+;;; Return in a list two date-strings of around a day before and after now
+(define (around-now)
+  (let* ((now (string->date (now) "~Y-~m-~dT~H:~M"))
+	 (year (date-year now))
+	 (month (date-month now))
+	 (day (date-day now))
+	 (hour (date-hour now))
+	 (zone-offset (date-zone-offset now))
+	 (latest-halfday-hour (- hour (modulo hour 12))))
+    (map
+     (lambda (date) (date->string date "~Y-~m-~dT~H:~M"))
+     (list 
+      (make-date 0 0 0 latest-halfday-hour (1- day) month year zone-offset)
+      (make-date 0 0 0 latest-halfday-hour (1+ day) month year zone-offset)))))
 
 (define (p-rout-view request body)
   (when +verbose+
@@ -517,22 +528,27 @@
 	 (view-lib-handler request body))
 	(else (not-found request))))
 
+;;; Wrong URL
 (define (not-found request)
   (values (build-response #:code 404)
 	  (string-append "Not found: "
 			 (uri->string (request-uri request)))))
 
-(define (sxml-date-input label)
+;;; SXML for a date input stuffed with default-date
+(define (sxml-date-input label default-date)
   `((label (@ (for ,label))
        ,(string-append label " "))
   (input (@ (type "Text")
 	    (id ,label)
 	    (name ,label)
-	    (maxlength "16") (size "16")
+	    (maxlength "16")
+	    (size "16")
+	    (value ,default-date)
 	    (onclick ,(string-append "javascript:NewCssCal('"
 				     label
 				     "','yyyyMMdd','dropdown',true,'24')"))))))
 
+;;; SXML for a bunch of radio buttons for output sets of wanted-render-mode
 (define (sxml-output-set-inputs wanted-render-mode)
   (map (lambda (output-set)
 	 `(input (@ (type "radio")
@@ -542,6 +558,7 @@
        (filter (lambda (x) (eq? wanted-render-mode (render-mode x)))
 	       (output-sets))))
 
+;;; SXML for a bunch of tables of latest values
 (define (sxml-latest-value-tables-div)
   `(div
     (@ (style "width:80%;" "margin:0 auto;" "text-align:center;"))
@@ -559,31 +576,32 @@
 			  #:reason-phrase "Ok"
 			  #:headers `((content-type . (text/html)) 
 				      (charset . "utf-8")))
-	  (with-output-to-string
-	    (lambda ()
-	      (display "<!DOCTYPE html>\n")
-	      (sxml->xml
-	       `(html
-		 (head
-		  (title "p-rout")
-		  (style "td {border: 1px solid black;}")
-		  (script (@ (src "/view/lib/datetimepicker_css.js")) ""))
-		 (body
-		  (@ (style "font-family: monospace;"))
-		  "p-rout v" ,*version*
-		  (div
-		   (@ (style "text-align:center;"
-			"margin:150px auto 100px auto;"))
-		   (form
-		    (@ (action "/view/render"))
-		    (p ,(sxml-date-input +from-label+)
-		       " "
-		       ,(sxml-date-input +to-label+))
-		    (p ,(sxml-output-set-inputs 'as-diagram))
-		    (p ,(sxml-output-set-inputs 'as-table))
-		    (p (input (@ (type "submit")
-				 (value "Go"))))))
-		  ,(sxml-latest-value-tables-div))))))))
+	  (let ((default-dates (map humanize-date-string (around-now))))
+	    (with-output-to-string
+	      (lambda ()
+		(display "<!DOCTYPE html>\n")
+		(sxml->xml
+		 `(html
+		   (head
+		    (title "p-rout")
+		    (style "td {border: 1px solid black;}")
+		    (script (@ (src "/view/lib/datetimepicker_css.js")) ""))
+		   (body
+		    (@ (style "font-family: monospace;"))
+		    "p-rout v" ,*version*
+		    (div
+		     (@ (style "text-align:center;"
+			  "margin:150px auto 100px auto;"))
+		     (form
+		      (@ (action "/view/render"))
+		      (p ,(sxml-date-input +from-label+ (first default-dates))
+			 " "
+			 ,(sxml-date-input +to-label+ (second default-dates)))
+		      (p ,(sxml-output-set-inputs 'as-diagram))
+		      (p ,(sxml-output-set-inputs 'as-table))
+		      (p (input (@ (type "submit")
+				   (value "Go"))))))
+		    ,(sxml-latest-value-tables-div)))))))))
 
 (define (view-render-handler request body)
   (let ((render-mode
