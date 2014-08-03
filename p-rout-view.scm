@@ -268,7 +268,9 @@
       ("Battery"
        "module_statuses.status" "module_statuses.module_id = 136")
       ("Solar"
-       "module_statuses.status" "module_statuses.module_id = 12")))
+       "module_statuses.status" "module_statuses.module_id = 12")
+      ("Grid sensor"
+       "module_statuses.status" "module_statuses.module_id = 11")))
     ("Events"
      ("events" ("header" "event") "header.time_send"
       "Raw event strings" as-table)
@@ -278,14 +280,14 @@
     ("Current Battery"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Battery" as-values)
-     (;; ("I_{charge}"
-      ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
+     (("I_charge"
+       "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
       ("V_charge"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136")
       ("I_batt"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
-      ;; ("I_{discharge}" 
-      ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
+      ("I_discharge" 
+       "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
       ("V_discharge" 
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
       ("V_batt" 
@@ -308,6 +310,8 @@
       "Power" as-values)
      (("P_batt"
        "module_statuses.param_2" "module_statuses.module_id = 136")
+      ("P_bus_batt"
+       "module_statuses.param_2" "module_statuses.module_id = 136")
       ("P_local"
        "module_statuses.param_6" "module_statuses.module_id = 9")
       ("P_grid_dcac"
@@ -329,6 +333,8 @@
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
       ("V_grid_dcac"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
+      ("V_bus_dcac"
+       "module_statuses.param_8 / 100" "moudule_statuses.module_id = 9")
       ("V_grid_platform"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
       ("V_L1"
@@ -337,6 +343,23 @@
        "module_statuses.param_4 / 10" "module_statuses.module_id = 11")
       ("V_L3"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 11")))
+    ("Current Current"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Current" as-values)
+     (("I_charge"
+       "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
+      ("I_discharge"
+       "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
+      ("I_batt"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
+      ("I_solar"
+       "module_statuses.param_6 / 100" "module_statuses.module_id = 12")
+      ("I_L1"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 11")
+      ("I_L2"
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 11")
+      ("I_L3"
+       "module_statuses.param_9 / 100" "module_statuses.module_id = 11")))							    
     ("Current Frequency"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Frequency" as-values)
@@ -383,7 +406,20 @@
       ("L2 consumed"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 11")
       ("L3 consumed"
-       "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")))))
+       "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")))
+    ("Current Status"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Status" as-values)
+     (("Platform"
+       "module_statuses.status" "module_statuses.module_id = 16")
+      ("Battery"
+       "module_statuses.status" "module_statuses.module_id = 136")
+      ("DC/AC"
+       "module_statuses.status" "module_statuses.module_id = 9")
+      ("Solar"
+       "module_statuses.status" "module_statuses.module_id = 12")
+      ("Grid sensor"
+       "module_statuses.status" "module_statuses.module_id = 11")))))
 
 (define (output-sets)
   (map car +output-sets+))
@@ -565,7 +601,7 @@
     (h4 "Current Values")
     ,(map (lambda (output-set)
 	    `(div
-	      '(@ (style "float:left;"))
+	      '(@ (style "float:left;" "padding:10px 2px"))
 	      (h5 ,(table-title output-set))
 	      ,(get-latest-value-sxml-table output-set)))
 	  (filter (lambda (x) (eq? 'as-values (render-mode x)))
@@ -591,7 +627,7 @@
 		    "p-rout v" ,*version*
 		    (div
 		     (@ (style "text-align:center;"
-			  "margin:150px auto 100px auto;"))
+			  "margin:100px auto 100px auto;"))
 		     (form
 		      (@ (action "/view/render"))
 		      (p ,(sxml-date-input +from-label+ (first default-dates))
