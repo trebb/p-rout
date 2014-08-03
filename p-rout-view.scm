@@ -334,7 +334,7 @@
       ("V_grid_dcac"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
       ("V_bus_dcac"
-       "module_statuses.param_8 / 100" "moudule_statuses.module_id = 9")
+       "module_statuses.param_8 / 100" "module_statuses.module_id = 9")
       ("V_grid_platform"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
       ("V_L1"
