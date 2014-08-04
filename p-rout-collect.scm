@@ -225,6 +225,9 @@
 ;;; ignore-codes are expected database error codes that don't cause
 ;;; log entries
 (define (logged-query logfile query . ignore-codes)
+  ;; guile-dbd-postgresql v2.1.4 refuses to do anything until we've read
+  ;; any previous results
+  (while (dbi-get_row *db*))
   (when +verbose+
     (file-log logfile query))
   (dbi-query *db* query)
@@ -239,22 +242,15 @@
      (file-log logfile "weird status message: " unexpected)
      unexpected)))
 
-;;; guile-dbd-postgresql v2.1.4 doesn't do anything until we've read
-;;; any previous results
-(define (flush-query)
-  (while (dbi-get_row *db*)))
-
 ;;; Make a bunch of SQL tables if necessary
 (define (create-tables schema tablenames)
   (logged-query "db" (string-append "CREATE SCHEMA IF NOT EXISTS " schema))
-  (flush-query)
   (for-each
    (lambda (tablename)
      (logged-query (dot-append schema tablename)
 		   (string-join `("CREATE TABLE IF NOT EXISTS"
 				  ,(dot-append schema tablename)
-				  "(" ,+record-id-column+ "integer)")))
-     (flush-query))
+				  "(" ,+record-id-column+ "integer)"))))
    tablenames))
 
 (define (column-names schema table)
@@ -262,7 +258,6 @@
 		(string-join
 		 `("SELECT * FROM" ,(dot-append schema table) "LIMIT 1")))
   (let ((result (dbi-get_row *db*)))
-    (flush-query)
     (if result
 	(map car result)
 	'())))
@@ -277,8 +272,7 @@
        (logged-query (dot-append schema table)
 		     (string-join `("ALTER TABLE"
 				    ,(dot-append schema table)
-				    "ADD COLUMN" ,columnname "text")))
-       (flush-query))
+				    "ADD COLUMN" ,columnname "text"))))
      missing-columns)))
 
 ;;; Extract from table-content the set of column names
@@ -317,8 +311,7 @@
     (logged-query (dot-append schema table)
 		  (string-join `("INSERT INTO"
 				 ,(dot-append schema table)
-				 "(" ,names ") VALUES (" ,vals ")")))
-    (flush-query)))
+				 "(" ,names ") VALUES (" ,vals ")")))))
 
 ;;; "/some/path/foo.json" -> "foo"
 (define (uri-path->basename uri-path)
@@ -341,7 +334,6 @@
   (let ((tablenames (ht->tablenames json)))
     (create-tables schema tablenames)
     (logged-query "db" "BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE")
-    (flush-query)
     (let ((next-id
 	   (apply
 	    max 
@@ -353,7 +345,6 @@
 					    ") AS last_id FROM"
 					    ,(dot-append schema table))))
 	       (let ((last-id (dbi-get_row *db*)))
-		 (flush-query)
 		 (match last-id
 		   ((("last_id" . latest-row))
 		    (if (number? latest-row)
@@ -378,8 +369,7 @@
 	       ((_ ...)
 		(add-row schema table names values next-id))))))
        tablenames))
-    (logged-query "db" "COMMIT TRANSACTION")
-    (flush-query)))
+    (logged-query "db" "COMMIT TRANSACTION")))
 
 (unless +no-daemon+
   (let ((pid (primitive-fork)))

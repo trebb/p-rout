@@ -498,6 +498,9 @@
 ;;; ignore-codes are expected database error codes that don't cause
 ;;; log entries
 (define (logged-query logfile query . ignore-codes)
+  ;; guile-dbd-postgresql v2.1.4 refuses to do anything until we've read
+  ;; any previous results
+  (while (dbi-get_row *db*))
   (when +verbose+
     (file-log logfile query))
   (dbi-query *db* query)
@@ -511,11 +514,6 @@
     (unexpected
      (file-log logfile "weird status message: " unexpected)
      unexpected)))
-
-;;; guile-dbd-postgresql v2.1.4 doesn't do anything until we've read
-;;; any previous results
-(define (flush-query)
-  (while (dbi-get_row *db*)))
 
 ;;; Turn query part of URI into an alist
 (define (uri-query-components request)
@@ -763,9 +761,7 @@
 	  " ORDER BY " (date-column output-set) " DESC"
 	  " LIMIT 1")))
     (logged-query "db" sql)
-    (let ((date (cdar (dbi-get_row *db*))))
-      (flush-query)
-      date)))
+    (cdar (dbi-get_row *db*))))
 
 ;;; Return data for one curve the way Gnuplot understands it
 (define (get-curve-points output-set curve-name from-date to-date)
@@ -925,11 +921,9 @@
 		      "AND t.relname = '" table "' "
 		      "AND a.attname = '" column "';"))
   (unless (dbi-get_row *db*)
-    (flush-query)
     (logged-query "db" (string-append
 			"CREATE INDEX " table "_" column "_index "
-			"ON " schema "." table " (" column ");")))
-  (flush-query))
+			"ON " schema "." table " (" column ");"))))
 
 (unless +no-daemon+
   (let ((pid (primitive-fork)))
@@ -947,11 +941,9 @@
   (lambda ()
     (set! *db* (dbi-open "postgresql" +db-connection+))
     (logged-query "db" "DROP CAST IF EXISTS (text AS double precision)")
-    (flush-query)
     (logged-query
      "db"
      "CREATE CAST (text AS double precision) WITH INOUT AS IMPLICIT")
-    (flush-query)
     (for-each (lambda (names) (apply create-index names))
 	      +db-indexes+))
   (lambda ()
