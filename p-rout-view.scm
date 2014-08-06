@@ -349,7 +349,7 @@
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
       ("T_solar1"
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")
-      ("T_solar"
+      ("T_solar2"
        "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")))
     ("energy-table"
      ("logs" ("header" "module_statuses") "header.time_send"
@@ -899,22 +899,6 @@
    " FROM t) = 0"
    " ORDER BY id LIMIT " (number->string number-of-rows)))
 
-;;; Return date of newest data in output-set
-(define (latest-date output-set)
-  (let ((sql
-	 (string-append
-	  "SELECT " (date-column output-set)
-	  " FROM "
-	  (let ((tables (tables output-set)))
-	    (if (> (length tables) 1)
-		(string-append (string-join tables " JOIN ")
-			       " USING (" +record-id-column+ ")")
-		(car tables)))
-	  " ORDER BY " (date-column output-set) " DESC"
-	  " LIMIT 1")))
-    (logged-query "db" sql)
-    (cdar (dbi-get_row *db*))))
-
 ;;; Return data for one curve the way Gnuplot understands it
 (define (get-curve-points output-set curve-name from-date to-date)
   (let ((sql (get-sql-row-sql output-set curve-name
@@ -972,7 +956,10 @@
 		    (string-append (string-join tables " JOIN ")
 				   " USING (" +record-id-column+ ")")
 		    (car tables)))
-	      
+	      (let ((sql-where (sql-where output-set curve-name)))
+		(if sql-where
+		    (string-append " WHERE " sql-where)
+		    ""))
 	      " ORDER BY " +record-id-column+ " DESC LIMIT 1"
 	      ")"
 	      " SELECT date, value FROM t")))
@@ -1013,13 +1000,12 @@
 
 ;;; Table of output-set with rows of latest values
 (define (get-latest-value-sxml-table output-set)
-  (let ((date (latest-date output-set)))
-    (cons* 'table
-	   `(th (@ (colspan "2")) ,(table-title output-set))
-	   (map
-	    (lambda (curve-name)
-	      (get-sxml-current-value-row output-set curve-name))
-	    (curve-names output-set)))))
+  (cons* 'table
+	 `(th (@ (colspan "2")) ,(table-title output-set))
+	 (map
+	  (lambda (curve-name)
+	    (get-sxml-current-value-row output-set curve-name))
+	  (curve-names output-set))))
 
 ;;; Table of output-set with one line per date
 (define (get-sxml-table output-set from-date to-date)
