@@ -133,7 +133,8 @@
 ;;;
 ;;; '((<first-output-set-name>
 ;;;    (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
-;;;     <gnuplot-diagram-title> <as-table-or-as-diagram>)
+;;;     <indexpage-title>
+;;;     <gnuplot-diagram-title-or-table-title> <as-table-or-as-diagram>)
 ;;;    ((<gnuplot-curve1-title>
 ;;;      <SQL-value1-column> <SQL-WHERE> <gnuplot-curve1-style>)
 ;;;     (<gnuplot-curve2-title>
@@ -141,7 +142,8 @@
 ;;;     ...))
 ;;;   (<second-output-set-name>
 ;;;    (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
-;;;     <gnuplot-diagram-title> <as-table-or-as-diagram>)
+;;;     <indexpage-title>
+;;;     <gnuplot-diagram-title-or-table-title> <as-table-or-as-diagram>)
 ;;;    ((<gnuplot-curve1-title>
 ;;;      <SQL-value1-column> <SQL-WHERE> <gnuplot-curve1-style>)
 ;;;     (<gnuplot-curve2-title>
@@ -149,36 +151,48 @@
 ;;;     ...))
 ;;;   ...)
 (define +output-sets+
-  '(("Battery"
+  '(;; Diagrams
+    ("battery-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
-      "" as-diagram)
+      "Battery"
+      "set keytitle '{/=12 Battery}'\n" as-diagram)
      (;; ("I_{charge}"
       ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
       ("V_{charge}"
-       "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+       "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines")
       ("I_{batt}"
-       "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green' smooth bezier")
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")
       ;; ("I_{discharge}" 
       ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
       ("V_{discharge}" 
-       "module_statuses.param_11 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+       "module_statuses.param_11 / 100" "module_statuses.module_id = 136" "lines")
       ("V_{batt}" 
-       "module_statuses.param_0 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 136" "lines")
       ("T_{batt}" 
-       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines")
       ("SOC" 
-       "module_statuses.param_5" "module_statuses.module_id = 136" "filledcurve y1=50 lw .2 lc rgb 'green'")))
-    ("Solar"
+       "module_statuses.param_5" "module_statuses.module_id = 136" "lines lw 4 lc rgb 'green'")))
+    ("solar-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Solar"
       "set keytitle '{/=12 Solar}'\n" as-diagram)
      (("P/kW"
        "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
-      ("V/100V"
+      ("P1/kW"
+       "module_statuses.param_2 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("P2/kW"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("V1/100V"
+       "module_statuses.param_0 / 10000" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("V2/100V"
        "module_statuses.param_5 / 10000" "module_statuses.module_id = 12" "lines smooth bezier")
-      ("I"
+      ("I1"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("I2"
        "module_statuses.param_6 / 100" "module_statuses.module_id = 12" "lines smooth bezier")))
-    ("Power"
+    ("power-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Power"
       "set keytitle '{/=12 Power}'\n" as-diagram)
      (("P_{batt}"
        "module_statuses.param_2" "module_statuses.module_id = 136" "lines lw 3 lc rgb 'green' smooth bezier")
@@ -190,14 +204,19 @@
        "module_statuses.param_3" "module_statuses.module_id = 16" "lines smooth bezier")
       ("P_{solar}"
        "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 3 lc rgb 'red' smooth bezier")
+      ("P1_{solar}"
+       "module_statuses.param_2" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("P2_{solar}"
+       "module_statuses.param_7" "module_statuses.module_id = 12" "lines smooth bezier")
       ("P_{L1}"
        "module_statuses.param_2" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
       ("P_{L2}"
        "module_statuses.param_6" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red' smooth bezier")
       ("P_{L3}"
        "module_statuses.param_10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet' smooth bezier")))
-    ("Voltage"
+    ("voltage-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Voltage"
       "set keytitle '{/=12 AC Voltage}'\nset yrange [220:240]\n" as-diagram)
      (("V_{local}"
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
@@ -211,15 +230,17 @@
        "module_statuses.param_4 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red' smooth bezier")
       ("V_{L3}"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet' smooth bezier")))
-    ("Frequency"
+    ("frequency-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
-      "" as-diagram)
+      "Frequency"
+      "set keytitle '{/=12 Frequency}'\n" as-diagram)
      (("f_{dcac}"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 9" "lines smooth bezier")
       ("f_{platform}"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 16" "lines smooth bezier")))
-    ("Temperature"
+    ("temperature-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Temperature"
       "set keytitle '{/=12 Temperature}'\n" as-diagram)
      (("T_{dcac}"
        "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines lc rgb 'blue' smooth bezier")
@@ -231,9 +252,109 @@
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
       ("T_{solar}"
        "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")))
-    ("Energy"
+    ;; Tables
+    ("battery-table"
      ("logs" ("header" "module_statuses") "header.time_send"
-      "" as-table)
+      "Battery"
+      "Battery" as-table)
+     ( ;; ("I_{charge}"
+      ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("V_charge"
+       "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("I_batt"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green' smooth bezier")
+      ;; ("I_{discharge}" 
+      ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("V_{discharge}" 
+       "module_statuses.param_11 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("V_batt" 
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("T_batt" 
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines smooth bezier")
+      ("SOC" 
+       "module_statuses.param_5" "module_statuses.module_id = 136" "filledcurve y1=50 lw .2 lc rgb 'green'")))
+    ("solar-table"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Solar"
+      "Solar" as-table)
+     (("P"
+       "module_statuses.param_10" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("P1"
+       "module_statuses.param_2" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("P2"
+       "module_statuses.param_7" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("V1"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("V2"
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("I1"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 12" "lines smooth bezier")
+      ("I2"
+       "module_statuses.param_6 / 100" "module_statuses.module_id = 12" "lines smooth bezier")))
+    ("power-table"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Power"
+      "Power" as-table)
+     (("P_batt"
+       "module_statuses.param_2" "module_statuses.module_id = 136" "lines lw 3 lc rgb 'green' smooth bezier")
+      ("P_local"
+       "module_statuses.param_6" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("P_grid_dcac"
+       "module_statuses.param_2" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("P_grid_platform"
+       "module_statuses.param_3" "module_statuses.module_id = 16" "lines smooth bezier")
+      ("P_solar"
+       "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 3 lc rgb 'red' smooth bezier")
+      ("P_L1"
+       "module_statuses.param_2" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
+      ("P_L2"
+       "module_statuses.param_6" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red' smooth bezier")
+      ("P_L3"
+       "module_statuses.param_10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet' smooth bezier")))
+    ("voltage-table"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Voltage"
+      "Voltage" as-table)
+     (("V_local"
+       "module_statuses.param_5 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("V_grid_dcac"
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("V_grid_platform"
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 16" "lines smooth bezier")
+      ("V_L1"
+       "module_statuses.param_0 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
+      ("V_L2"
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red' smooth bezier")
+      ("V_L3"
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet' smooth bezier")))
+    ("frequency-table"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Frequency"
+      "Frequency" as-table)
+     (("f_dcac"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 9" "lines smooth bezier")
+      ("f_platform"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 16" "lines smooth bezier")))
+    ("temperature-table"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Temperature"
+      "Temperature" as-table)
+     (("T_dcac"
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines lc rgb 'blue' smooth bezier")
+      ("T_platform"
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green' smooth bezier")
+      ("T_batt"
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 3 lc rgb 'green' smooth bezier")
+      ("T_batt_module"
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
+      ("T_solar1"
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")
+      ("T_solar"
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")))
+    ("energy-table"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Energy"
+      "Energy" as-table)
      (("Platform consumed"
        "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
       ("Platform produced"
@@ -252,14 +373,19 @@
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
       ("Solar produced"
        "module_statuses.param_11 / 1000" "module_statuses.module_id = 12")
+      ("Solar1 produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 12")
+      ("Solar2 produced"
+       "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
       ("L1 consumed"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
       ("L2 consumed"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 11")
       ("L3 consumed"
        "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")))
-    ("Status"
+    ("status-table"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Status"
       "Raw status strings" as-table)
      (("Platform"
        "module_statuses.status" "module_statuses.module_id = 16")
@@ -271,14 +397,16 @@
        "module_statuses.status" "module_statuses.module_id = 12")
       ("Grid sensor"
        "module_statuses.status" "module_statuses.module_id = 11")))
-    ("Events"
+    ("events-table"
      ("events" ("header" "event") "header.time_send"
+      "Events"
       "Raw event strings" as-table)
      (("Event"
        "event.data" #f)))
-
-    ("Current Battery"
+    ;; Front page values
+    ("current-battery"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Battery"
       "Battery" as-values)
      (("I_charge"
        "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
@@ -296,17 +424,27 @@
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
       ("SOC" 
        "module_statuses.param_5" "module_statuses.module_id = 136")))
-    ("Current Solar"
+    ("current-solar"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Solar"
       "Solar" as-values)
      (("P"
        "module_statuses.param_10" "module_statuses.module_id = 12")
-      ("V"
+      ("P1"
+       "module_statuses.param_2" "module_statuses.module_id = 12")
+      ("P2"
+       "module_statuses.param_7" "module_statuses.module_id = 12")
+      ("V1"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
+      ("V2"
        "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
-      ("I"
+      ("I1"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 12")
+      ("I2"
        "module_statuses.param_6 / 100" "module_statuses.module_id = 12")))
-    ("Current Power"
+    ("current-power"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Power"
       "Power" as-values)
      (("P_batt"
        "module_statuses.param_2" "module_statuses.module_id = 136")
@@ -326,8 +464,9 @@
        "module_statuses.param_6" "module_statuses.module_id = 11")
       ("P_L3"
        "module_statuses.param_10" "module_statuses.module_id = 11")))
-    ("Current Voltage"
+    ("current-voltage"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Voltage"
       "Voltage" as-values)
      (("V_local"
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
@@ -343,8 +482,9 @@
        "module_statuses.param_4 / 10" "module_statuses.module_id = 11")
       ("V_L3"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 11")))
-    ("Current Current"
+    ("current-current"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Current"
       "Current" as-values)
      (("I_charge"
        "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
@@ -360,15 +500,17 @@
        "module_statuses.param_5 / 100" "module_statuses.module_id = 11")
       ("I_L3"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 11")))							    
-    ("Current Frequency"
+    ("current-frequency"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Frequency"
       "Frequency" as-values)
      (("f_dcac"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 9")
       ("f_platform"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 16")))
-    ("Current Temperature"
+    ("current-temperature"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Temperature"
       "Temperature" as-values)
      (("T_dcac"
        "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
@@ -378,10 +520,13 @@
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
       ("T_batt_module"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
-      ("T_solar"
+      ("T_solar1"
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 12")
+      ("T_solar2"
        "module_statuses.param_9 / 10" "module_statuses.module_id = 12")))
-    ("Current Energy"
+    ("current-energy"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Energy"
       "Energy" as-values)
      (("Platform consumed"
        "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
@@ -407,8 +552,9 @@
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 11")
       ("L3 consumed"
        "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")))
-    ("Current Status"
+    ("current-status"
      ("logs" ("header" "module_statuses") "header.time_send"
+      "Status"
       "Status" as-values)
      (("Platform"
        "module_statuses.status" "module_statuses.module_id = 16")
@@ -419,7 +565,9 @@
       ("Solar"
        "module_statuses.status" "module_statuses.module_id = 12")
       ("Grid sensor"
-       "module_statuses.status" "module_statuses.module_id = 11")))))
+       "module_statuses.status" "module_statuses.module_id = 11")
+      ("PR Id"
+       "header.powerrouter_id" "TRUE")))))
 
 (define (output-sets)
   (map car +output-sets+))
@@ -435,14 +583,17 @@
 (define (date-column output-set)
   (third (cadr (assoc output-set +output-sets+))))
 
-(define (gnuplot-settings output-set)
+(define (indexpage-title output-set)
   (fourth (cadr (assoc output-set +output-sets+))))
+
+(define (gnuplot-settings output-set)
+  (fifth (cadr (assoc output-set +output-sets+))))
 
 (define (table-title output-set)
   (gnuplot-settings output-set))
 
 (define (render-mode output-set)
-  (fifth (cadr (assoc output-set +output-sets+))))
+  (sixth (cadr (assoc output-set +output-sets+))))
 
 (define (curve-names output-set)
   (map car (caddr (assoc output-set +output-sets+))))
@@ -588,7 +739,7 @@
 	 `(input (@ (type "radio")
 		    (name "output-set")
 		    (value ,output-set))
-		 ,(string-append output-set " ")))
+		 ,(string-append (indexpage-title output-set) " ")))
        (filter (lambda (x) (eq? wanted-render-mode (render-mode x)))
 	       (output-sets))))
 
@@ -600,7 +751,6 @@
     ,(map (lambda (output-set)
 	    `(div
 	      '(@ (style "float:left;" "padding:10px 2px"))
-	      (h5 ,(table-title output-set))
 	      ,(get-latest-value-sxml-table output-set)))
 	  (filter (lambda (x) (eq? 'as-values (render-mode x)))
 		  (output-sets)))))
@@ -631,7 +781,9 @@
 		      (p ,(sxml-date-input +from-label+ (first default-dates))
 			 " "
 			 ,(sxml-date-input +to-label+ (second default-dates)))
+		      (h4 "Diagrams")
 		      (p ,(sxml-output-set-inputs 'as-diagram))
+		      (h4 "Tables")
 		      (p ,(sxml-output-set-inputs 'as-table))
 		      (p (input (@ (type "submit")
 				   (value "Go"))))))
@@ -793,7 +945,7 @@
     (do ((sql-row (dbi-get_row *db*)
 		  (dbi-get_row *db*))
 	 (result `( ,(if date-column?
-			 `(th ,output-set)
+			 `(th ,(table-title output-set))
 			 `(td ,curve-name)))))
 	((not sql-row) result)
       (set! result
@@ -806,6 +958,28 @@
 						  sql-row))
 				     (cdr (assoc "value"
 						 sql-row)))))))))))))
+
+;;; A single sxml table row comprising curve-name, newest value
+(define (get-sxml-current-value-row output-set curve-name)
+  (let ((sql (string-append
+	      "WITH t (id, date, value) AS"
+	      " (SELECT " +record-id-column+
+	      ", " (date-column output-set)
+	      ", " (columnname output-set curve-name)
+	      " FROM "
+	      (let ((tables (tables output-set)))
+		(if (> (length tables) 1)
+		    (string-append (string-join tables " JOIN ")
+				   " USING (" +record-id-column+ ")")
+		    (car tables)))
+	      
+	      " ORDER BY " +record-id-column+ " DESC LIMIT 1"
+	      ")"
+	      " SELECT date, value FROM t")))
+    (logged-query "db" sql)
+    `(tr (td ,curve-name)
+	 (td ,(cdr (assoc "value"
+			  (dbi-get_row *db*)))))))	
 
 (define (gnuplot-commands output-set from-date to-date)
   (let* ((curve-names (curve-names output-set)))
@@ -840,13 +1014,12 @@
 ;;; Table of output-set with rows of latest values
 (define (get-latest-value-sxml-table output-set)
   (let ((date (latest-date output-set)))
-    (cons 'table
-	  (map
-	   (lambda (curve-name)
-	     (cons 'tr
-		   ;; actually, we're getting rows here
-		   (get-sxml-table-column output-set curve-name date date #f)))
-	   (curve-names output-set)))))
+    (cons* 'table
+	   `(th (@ (colspan "2")) ,(table-title output-set))
+	   (map
+	    (lambda (curve-name)
+	      (get-sxml-current-value-row output-set curve-name))
+	    (curve-names output-set)))))
 
 ;;; Table of output-set with one line per date
 (define (get-sxml-table output-set from-date to-date)
@@ -951,4 +1124,3 @@
 		'http
 		`(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+))))
   (lambda () (dbi-close *db*)))
-
