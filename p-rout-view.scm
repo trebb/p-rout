@@ -981,6 +981,7 @@
      "set format x \"%a\\n%Y-%m-%d\\n%H:%M:%S\"\n"
      "set xdata time\n"
      "set style fill transparent solid 0.1\n"
+     "set grid ytics\n"
      (gnuplot-settings output-set)
      "\n"
      "plot "
