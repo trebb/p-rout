@@ -113,7 +113,8 @@
 (define +addr+ (option-ref options 'addr "192.168.178.51"))
 (define +port+ (string->number (option-ref options 'port "80")))
 (define +no-daemon+ (option-ref options 'no-daemon #f))
-(define +pid-file+ (option-ref options 'pid-file "/var/run/p-rout/p-rout-view.pid"))
+(define +pid-file+ (option-ref
+		    options 'pid-file "/var/run/p-rout/p-rout-view.pid"))
 (define +from-label+ "From")
 (define +to-label+ "To")
 (define +table-number-of-columns+ 80)
@@ -904,8 +905,8 @@
 ;;; for a curve from an output-set and from a time interval
 (define (get-sql-row-sql output-set curve-name from-date to-date number-of-rows)
   (string-append
-   "WITH t (id, date, value) AS"
-   " (SELECT " +record-id-column+
+   "WITH t (row_number, date, value) AS"
+   " (SELECT row_number() OVER (ORDER BY " (date-column output-set) ")"
    ", " (date-column output-set)
    ", " (columnname output-set curve-name)
    " FROM "
@@ -922,10 +923,10 @@
 	 (string-append " AND " sql-where)
 	 ""))
    ")"
-   " SELECT date, value FROM t WHERE id % (SELECT 1 + count(*) / "
+   " SELECT date, value FROM t WHERE row_number % (SELECT 1 + count(*) / "
    (number->string number-of-rows)
    " FROM t) = 0"
-   " ORDER BY id LIMIT " (number->string number-of-rows)))
+   " LIMIT " (number->string number-of-rows)))
 
 ;;; Return data for one curve the way Gnuplot understands it
 (define (get-curve-points output-set curve-name from-date to-date)
@@ -974,9 +975,8 @@
 ;;; A single sxml table row comprising curve-name, newest value
 (define (get-sxml-current-value-row output-set curve-name)
   (let ((sql (string-append
-	      "WITH t (id, date, value) AS"
-	      " (SELECT " +record-id-column+
-	      ", " (date-column output-set)
+	      "WITH t (date, value) AS"
+	      " (SELECT " (date-column output-set)
 	      ", " (columnname output-set curve-name)
 	      " FROM "
 	      (let ((tables (tables output-set)))
@@ -988,7 +988,7 @@
 		(if sql-where
 		    (string-append " WHERE " sql-where)
 		    ""))
-	      " ORDER BY " +record-id-column+ " DESC LIMIT 1"
+	      " ORDER BY " (date-column output-set) " DESC LIMIT 1"
 	      ")"
 	      " SELECT date, value FROM t")))
     (logged-query "db" sql)
