@@ -118,7 +118,7 @@
 (define +from-label+ "From")
 (define +to-label+ "To")
 (define +table-number-of-columns+ 80)
-(define +diagram-number-of-values+ 400)
+(define +diagram-number-of-values+ (* 24 60))
 (define *db* #f)
 
 (define +db-indexes+			;((schema table column) ...)
