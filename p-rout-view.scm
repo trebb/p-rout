@@ -230,7 +230,7 @@
     ("voltage-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "AC Voltage"
-      "set keytitle '{/=12 AC Voltage}'\nset yrange [220:240]\n" as-diagram)
+      "set keytitle '{/=12 AC Voltage}'\nset yrange [220:]\n" as-diagram)
      (("V_{local}"
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
       ("V_{grid_{dcac}}"
