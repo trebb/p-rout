@@ -117,8 +117,8 @@
 		    options 'pid-file "/var/run/p-rout/p-rout-view.pid"))
 (define +from-label+ "From")
 (define +to-label+ "To")
-(define +table-number-of-columns+ 80)
-(define +diagram-number-of-values+ (* 24 60))
+(define +table-number-of-columns+ (* 12 60))
+(define +diagram-number-of-values+ 400)
 (define *db* #f)
 
 (define +db-indexes+			;((schema table column) ...)
@@ -158,13 +158,13 @@
       "Overview"
       "set keytitle '{/=12 Overview}'\n" as-diagram)
      (("P_{solar}/kW"
-       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 3 lc rgb 'red' smooth bezier")
+       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
       ("P_{grid_{dcac}}/kW"
        "module_statuses.param_2 / 1000" "module_statuses.module_id = 9" "lines smooth bezier")
       ("P_{grid_{platform}}/kW"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 16" "lines smooth bezier")
       ("SOC/100%" 
-       "module_statuses.param_5 / 100" "module_statuses.module_id = 136" "lines lw 4 lc rgb 'green'")))
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")))
     ("battery-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Battery"
@@ -174,7 +174,7 @@
       ("V_{charge}"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines")
       ("I_{batt}"
-       "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lc rgb 'green'")
       ;; ("I_{discharge}" 
       ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
       ("V_{discharge}" 
@@ -184,13 +184,13 @@
       ("T_{batt}" 
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines")
       ("SOC" 
-       "module_statuses.param_5" "module_statuses.module_id = 136" "lines lw 4 lc rgb 'green'")))
+       "module_statuses.param_5" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")))
     ("solar-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Solar"
       "set keytitle '{/=12 Solar}'\n" as-diagram)
      (("P/kW"
-       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
       ("P1/kW"
        "module_statuses.param_2 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
       ("P2/kW"
@@ -208,7 +208,7 @@
       "Power"
       "set keytitle '{/=12 Power}'\n" as-diagram)
      (("P_{batt}"
-       "module_statuses.param_2" "module_statuses.module_id = 136" "lines lw 3 lc rgb 'green' smooth bezier")
+       "module_statuses.param_2" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
       ("P_{local}"
        "module_statuses.param_6" "module_statuses.module_id = 9" "lines smooth bezier")
       ("P_{grid_{dcac}}"
@@ -216,7 +216,7 @@
       ("P_{grid_{platform}}"
        "module_statuses.param_3" "module_statuses.module_id = 16" "lines smooth bezier")
       ("P_{solar}"
-       "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 3 lc rgb 'red' smooth bezier")
+       "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
       ("P1_{solar}"
        "module_statuses.param_2" "module_statuses.module_id = 12" "lines smooth bezier")
       ("P2_{solar}"
@@ -260,7 +260,7 @@
       ("T_{platform}"
        "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green' smooth bezier")
       ("T_{batt}"
-       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 3 lc rgb 'green' smooth bezier")
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green' smooth bezier")
       ("T_{batt_{module}}"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
       ("T1_{solar}"
@@ -999,7 +999,7 @@
 (define (gnuplot-commands output-set from-date to-date)
   (let* ((curve-names (curve-names output-set)))
     (string-append
-     "set terminal 'svg' enhanced linewidth 2 mouse jsdir '/view/lib/'"
+     "set terminal 'svg' enhanced mouse jsdir '/view/lib/'"
      " size 1200, 800 dynamic fsize 8\n"
      "set encoding utf8\n"
      "set output\n"
