@@ -130,12 +130,13 @@
 ;;;
 ;;; +output-sets+: presentation style definitions
 ;;;
-;;; An output-set is either a diagram or a table defined like this:
+;;; An output-set is a diagram, a table, or a set of latest values
+;;; defined like this:
 ;;;
 ;;; '((<first-output-set-name>
 ;;;    (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
 ;;;     <indexpage-title>
-;;;     <gnuplot-diagram-title-or-table-title> <as-table-or-as-diagram>)
+;;;     <gnuplot-diagram-title-or-table-title> <as-table-or-diagram-or-values>)
 ;;;    ((<gnuplot-curve1-title>
 ;;;      <SQL-value1-column> <SQL-WHERE> <gnuplot-curve1-style>)
 ;;;     (<gnuplot-curve2-title>
@@ -144,7 +145,7 @@
 ;;;   (<second-output-set-name>
 ;;;    (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
 ;;;     <indexpage-title>
-;;;     <gnuplot-diagram-title-or-table-title> <as-table-or-as-diagram>)
+;;;     <gnuplot-diagram-title-or-table-title> <as-table-or-diagram-or-values>)
 ;;;    ((<gnuplot-curve1-title>
 ;;;      <SQL-value1-column> <SQL-WHERE> <gnuplot-curve1-style>)
 ;;;     (<gnuplot-curve2-title>
