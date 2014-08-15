@@ -160,9 +160,9 @@
       "set keytitle '{/=12 Overview}'\n" as-diagram)
      (("P_{solar}/kW"
        "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
-      ("P_{grid_{dcac}}/kW"
+      ("P_{grid,dcac}/kW"
        "module_statuses.param_2 / 1000" "module_statuses.module_id = 9" "lines smooth bezier")
-      ("P_{grid_{platform}}/kW"
+      ("P_{grid,platform}/kW"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 16" "lines smooth bezier")
       ("SOC/100%" 
        "module_statuses.param_5 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")))
@@ -172,19 +172,19 @@
       "set keytitle '{/=12 Battery}'\n" as-diagram)
      (;; ("I_{charge}"
       ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
-      ("V_{charge}"
+      ("V_{charge}/V"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines")
-      ("I_{batt}"
+      ("I_{batt}/A"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lc rgb 'green'")
       ;; ("I_{discharge}" 
       ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
-      ("V_{discharge}" 
+      ("V_{discharge}/V" 
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136" "lines")
-      ("V_{batt}" 
+      ("V_{batt}/V" 
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136" "lines")
-      ("T_{batt}" 
+      ("T_{batt}/°C" 
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines")
-      ("SOC" 
+      ("SOC/%" 
        "module_statuses.param_5" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")))
     ("solar-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
@@ -192,35 +192,35 @@
       "set keytitle '{/=12 Solar}'\n" as-diagram)
      (("P/kW"
        "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
-      ("P1/kW"
+      ("P_1/kW"
        "module_statuses.param_2 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
-      ("P2/kW"
+      ("P_2/kW"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
-      ("V1/100V"
+      ("V_1/100V"
        "module_statuses.param_0 / 10000" "module_statuses.module_id = 12" "lines smooth bezier")
-      ("V2/100V"
+      ("V_2/100V"
        "module_statuses.param_5 / 10000" "module_statuses.module_id = 12" "lines smooth bezier")
-      ("I1"
+      ("I_1/A"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 12" "lines smooth bezier")
-      ("I2"
+      ("I_2/A"
        "module_statuses.param_6 / 100" "module_statuses.module_id = 12" "lines smooth bezier")))
     ("power-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Power"
-      "set keytitle '{/=12 Power}'\n" as-diagram)
+      "set keytitle '{/=12 Power/W}'\n" as-diagram)
      (("P_{batt}"
        "module_statuses.param_2" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
       ("P_{local}"
        "module_statuses.param_6" "module_statuses.module_id = 9" "lines smooth bezier")
-      ("P_{grid_{dcac}}"
+      ("P_{grid,dcac}"
        "module_statuses.param_2" "module_statuses.module_id = 9" "lines smooth bezier")
-      ("P_{grid_{platform}}"
+      ("P_{grid,platform}"
        "module_statuses.param_3" "module_statuses.module_id = 16" "lines smooth bezier")
       ("P_{solar}"
        "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
-      ("P1_{solar}"
+      ("P_{1,solar}"
        "module_statuses.param_2" "module_statuses.module_id = 12" "lines smooth bezier")
-      ("P2_{solar}"
+      ("P_{2,solar}"
        "module_statuses.param_7" "module_statuses.module_id = 12" "lines smooth bezier")
       ("P_{L1}"
        "module_statuses.param_2" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
@@ -231,12 +231,12 @@
     ("voltage-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "AC Voltage"
-      "set keytitle '{/=12 AC Voltage}'\nset yrange [220:]\n" as-diagram)
+      "set keytitle '{/=12 AC Voltage/V}'\nset yrange [220:]\n" as-diagram)
      (("V_{local}"
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
-      ("V_{grid_{dcac}}"
+      ("V_{grid,dcac}"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
-      ("V_{grid_{platform}}"
+      ("V_{grid,platform}"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16" "lines smooth bezier")
       ("V_{L1}"
        "module_statuses.param_0 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
@@ -247,7 +247,7 @@
     ("frequency-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Frequency"
-      "set keytitle '{/=12 Frequency}'\n" as-diagram)
+      "set keytitle '{/=12 Frequency/Hz}'\n" as-diagram)
      (("f_{dcac}"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 9" "lines smooth bezier")
       ("f_{platform}"
@@ -255,130 +255,130 @@
     ("temperature-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Temperature"
-      "set keytitle '{/=12 Temperature}'\n" as-diagram)
+      "set keytitle '{/=12 Temperature/°C}'\n" as-diagram)
      (("T_{dcac}"
        "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines lc rgb 'blue' smooth bezier")
       ("T_{platform}"
        "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green' smooth bezier")
       ("T_{batt}"
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green' smooth bezier")
-      ("T_{batt_{module}}"
+      ("T_{batt,module}"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
-      ("T1_{solar}"
+      ("T_{1,solar}"
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")
-      ("T2_{solar}"
+      ("T_{2,solar}"
        "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'dark-red' smooth bezier")))
     ;; Tables
     ("battery-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Battery"
       "Battery" as-table)
-     ( ("I_charge"
+     ( ('("I" (sub "charge") "/A")
        "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
-      ("V_charge"
+      ('("V" (sub "charge") "/V")
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136")
-      ("I_batt"
+      ('("I" (sub "batt") "/A")
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
-      ("I_discharge" 
+      ('("I" (sub "discharge") "/A" )
        "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
-      ("V_discharge" 
+      ('("V" (sub "discharge") "/V" )
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
-      ("V_batt" 
+      ('("V" (sub "batt") "/V" )
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
-      ("T_batt" 
+      ('("T" (sub "batt") "/°C" )
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
-      ("SOC" 
+      ("SOC/%" 
        "module_statuses.param_5" "module_statuses.module_id = 136")))
     ("solar-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Solar"
       "Solar" as-table)
-     (("P"
+     (("P/W"
        "module_statuses.param_10" "module_statuses.module_id = 12")
-      ("P1"
+      ('("P" (sub "1") "/W")
        "module_statuses.param_2" "module_statuses.module_id = 12")
-      ("P2"
+      ('("P" (sub "2") "/W")
        "module_statuses.param_7" "module_statuses.module_id = 12")
-      ("V1"
+      ('("V" (sub "1") "/V")
        "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
-      ("V2"
+      ('("V" (sub "2") "/V")
        "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
-      ("I1"
+      ('("I" (sub "1") "/A")
        "module_statuses.param_1 / 100" "module_statuses.module_id = 12")
-      ("I2"
+      ('("I" (sub "2") "/A")
        "module_statuses.param_6 / 100" "module_statuses.module_id = 12")))
     ("power-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Power"
-      "Power" as-table)
-     (("P_batt"
+      "Power/W" as-table)
+     (('("P" (sub "batt"))
        "module_statuses.param_2" "module_statuses.module_id = 136")
-      ("P_local"
+      ('("P" (sub "local"))
        "module_statuses.param_6" "module_statuses.module_id = 9")
-      ("P_grid_dcac"
+      ('("P" (sub "grid,dcac"))
        "module_statuses.param_2" "module_statuses.module_id = 9")
-      ("P_grid_platform"
+      ('("P" (sub "grid,platform"))
        "module_statuses.param_3" "module_statuses.module_id = 16")
-      ("P1_solar"
+      ('("P" (sub "1,solar"))
        "module_statuses.param_2" "module_statuses.module_id = 12")
-      ("P2_solar"
+      ('("P" (sub "2,solar"))
        "module_statuses.param_7" "module_statuses.module_id = 12")
-      ("P_L1"
+      ('("P" (sub "L1"))
        "module_statuses.param_2" "module_statuses.module_id = 11")
-      ("P_L2"
+      ('("P" (sub "L2"))
        "module_statuses.param_6" "module_statuses.module_id = 11")
-      ("P_L3"
+      ('("P" (sub "L3"))
        "module_statuses.param_10" "module_statuses.module_id = 11")))
     ("voltage-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Voltage"
-      "Voltage" as-table)
-     (("V_batt" 
+      "Voltage/V" as-table)
+     (('("V" (sub "batt" ))
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
-      ("V_local"
+      ('("V" (sub "local"))
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
-      ("V_grid_dcac"
+      ('("V" (sub "grid,dcac"))
        "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
-      ("V_grid_platform"
+      ('("V" (sub "grid,platform"))
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
-      ("V1_solar"
+      ('("V" (sub "1,solar"))
        "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
-      ("V2_solar"
+      ('("V" (sub "2,solar"))
        "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
-      ("V_L1"
+      ('("V" (sub "L1"))
        "module_statuses.param_0 / 10" "module_statuses.module_id = 11")
-      ("V_L2"
+      ('("V" (sub "L2"))
        "module_statuses.param_4 / 10" "module_statuses.module_id = 11")
-      ("V_L3"
+      ('("V" (sub "L3"))
        "module_statuses.param_8 / 10" "module_statuses.module_id = 11")))
     ("frequency-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Frequency"
-      "Frequency" as-table)
-     (("f_dcac"
+      "Frequency/Hz" as-table)
+     (('("f" (sub "dcac"))
        "module_statuses.param_0 / 100" "module_statuses.module_id = 9")
-      ("f_platform"
+      ('("f" (sub "platform"))
        "module_statuses.param_0 / 100" "module_statuses.module_id = 16")))
     ("temperature-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Temperature"
-      "Temperature" as-table)
-     (("T_dcac"
+      "Temperature/°C" as-table)
+     (('("T" (sub "dcac"))
        "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
-      ("T_platform"
+      ('("T" (sub "platform"))
        "module_statuses.param_2 / 10" "module_statuses.module_id = 16")
-      ("T_batt"
+      ('("T" (sub "batt"))
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
-      ("T_batt_module"
+      ('("T" (sub "batt,module"))
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
-      ("T1_solar"
+      ('("T" (sub "1,solar"))
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12")
-      ("T2_solar"
+      ('("T" (sub "2,solar"))
        "module_statuses.param_9 / 10" "module_statuses.module_id = 12")))
     ("energy-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Energy"
-      "Energy" as-table)
+      "Energy/kWh" as-table)
      (("Platform consumed"
        "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
       ("Platform produced"
@@ -432,132 +432,132 @@
      ("logs" ("header" "module_statuses") "header.time_send"
       "Battery"
       "Battery" as-values)
-     (("I_charge"
+     (('("I" (sub "charge") "/A")
        "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
-      ("V_charge"
+      ('("V" (sub "charge") "/V")
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136")
-      ("I_batt"
+      ('("I" (sub "batt") "/A")
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
-      ("I_discharge" 
+      ('("I" (sub "discharge") "/A" )
        "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
-      ("V_discharge" 
+      ('("V" (sub "discharge") "/V" )
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
-      ("V_batt" 
+      ('("V" (sub "batt") "/V" )
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
-      ("T_batt" 
+      ('("T" (sub "batt") "/°C" )
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
-      ("SOC" 
+      ("SOC/%" 
        "module_statuses.param_5" "module_statuses.module_id = 136")))
     ("current-solar"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Solar"
       "Solar" as-values)
-     (("P"
+     (("P/W"
        "module_statuses.param_10" "module_statuses.module_id = 12")
-      ("P1"
+      ('("P" (sub "1") "/W")
        "module_statuses.param_2" "module_statuses.module_id = 12")
-      ("P2"
+      ('("P" (sub "2") "/W")
        "module_statuses.param_7" "module_statuses.module_id = 12")
-      ("V1"
+      ('("V" (sub "1") "/V")
        "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
-      ("V2"
+      ('("V" (sub "2") "/V")
        "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
-      ("I1"
+      ('("I" (sub "1") "/A")
        "module_statuses.param_1 / 100" "module_statuses.module_id = 12")
-      ("I2"
+      ('("I" (sub "2") "/A")
        "module_statuses.param_6 / 100" "module_statuses.module_id = 12")))
     ("current-power"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Power"
-      "Power" as-values)
-     (("P_batt"
+      "Power/W" as-values)
+     (('("P" (sub "batt"))
        "module_statuses.param_2" "module_statuses.module_id = 136")
-      ("P_bus_batt"
+      ('("P" (sub "bus,batt"))
        "module_statuses.param_2" "module_statuses.module_id = 136")
-      ("P_local"
+      ('("P" (sub "local"))
        "module_statuses.param_6" "module_statuses.module_id = 9")
-      ("P_grid_dcac"
+      ('("P" (sub "grid,dcac"))
        "module_statuses.param_2" "module_statuses.module_id = 9")
-      ("P_grid_platform"
+      ('("P" (sub "grid,platform"))
        "module_statuses.param_3" "module_statuses.module_id = 16")
-      ("P_solar"
+      ('("P" (sub "solar"))
        "module_statuses.param_10" "module_statuses.module_id = 12")
-      ("P1_solar"
+      ('("P" (sub "1,solar"))
        "module_statuses.param_2" "module_statuses.module_id = 12")
-      ("P2_solar"
+      ('("P" (sub "2,solar"))
        "module_statuses.param_7" "module_statuses.module_id = 12")
-      ("P_L1"
+      ('("P" (sub "L1"))
        "module_statuses.param_2" "module_statuses.module_id = 11")
-      ("P_L2"
+      ('("P" (sub "L2"))
        "module_statuses.param_6" "module_statuses.module_id = 11")
-      ("P_L3"
+      ('("P" (sub "L3"))
        "module_statuses.param_10" "module_statuses.module_id = 11")))
     ("current-voltage"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Voltage"
-      "Voltage" as-values)
-     (("V_local"
+      "Voltage/V" as-values)
+     (('("V" (sub "local"))
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
-      ("V_grid_dcac"
+      ('("V" (sub "grid,dcac"))
        "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
-      ("V_bus_dcac"
+      ('("V" (sub "bus,dcac"))
        "module_statuses.param_8 / 100" "module_statuses.module_id = 9")
-      ("V_grid_platform"
+      ('("V" (sub "grid,platform"))
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
-      ("V_L1"
+      ('("V" (sub "L1"))
        "module_statuses.param_0 / 10" "module_statuses.module_id = 11")
-      ("V_L2"
+      ('("V" (sub "L2"))
        "module_statuses.param_4 / 10" "module_statuses.module_id = 11")
-      ("V_L3"
+      ('("V" (sub "L3"))
        "module_statuses.param_8 / 10" "module_statuses.module_id = 11")))
     ("current-current"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Current"
-      "Current" as-values)
-     (("I_charge"
+      "Current/A" as-values)
+     (('("I" (sub "charge"))
        "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
       ("I_discharge"
        "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
-      ("I_batt"
+      ('("I" (sub "batt"))
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
-      ("I1_solar"
+      ('("I" (sub "1,solar"))
        "module_statuses.param_1 / 100" "module_statuses.module_id = 12")
-      ("I2_solar"
+      ('("I" (sub "2,solar"))
        "module_statuses.param_6 / 100" "module_statuses.module_id = 12")
-      ("I_L1"
+      ('("I" (sub "L1"))
        "module_statuses.param_1 / 100" "module_statuses.module_id = 11")
-      ("I_L2"
+      ('("I" (sub "L2"))
        "module_statuses.param_5 / 100" "module_statuses.module_id = 11")
-      ("I_L3"
+      ('("I" (sub "L3"))
        "module_statuses.param_9 / 100" "module_statuses.module_id = 11")))							    
     ("current-frequency"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Frequency"
-      "Frequency" as-values)
-     (("f_dcac"
+      "Frequency/Hz" as-values)
+     (('("f" (sub "dcac"))
        "module_statuses.param_0 / 100" "module_statuses.module_id = 9")
-      ("f_platform"
+      ('("f" (sub "platform"))
        "module_statuses.param_0 / 100" "module_statuses.module_id = 16")))
     ("current-temperature"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Temperature"
-      "Temperature" as-values)
-     (("T_dcac"
+      "Temperature/°C" as-values)
+     (('("T" (sub "dcac"))
        "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
-      ("T_platform"
+      ('("T" (sub "platform"))
        "module_statuses.param_2 / 10" "module_statuses.module_id = 16")
-      ("T_batt"
+      ('("T" (sub "batt"))
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
-      ("T_batt_module"
+      ('("T" (sub "batt,module"))
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
-      ("T1_solar"
+      ('("T" (sub "1,solar"))
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12")
-      ("T2_solar"
+      ('("T" (sub "2,solar"))
        "module_statuses.param_9 / 10" "module_statuses.module_id = 12")))
     ("current-energy"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Energy"
-      "Energy" as-values)
+      "Energy/kWh" as-values)
      (("Platform consumed"
        "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
       ("Platform produced"
