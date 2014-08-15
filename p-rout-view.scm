@@ -1010,7 +1010,8 @@
      "set format x \"%a\\n%Y-%m-%d\\n%H:%M:%S\"\n"
      "set xdata time\n"
      "set style fill transparent solid 0.1\n"
-     "set grid ytics\n"
+     "set mytics 4\n"
+     "set grid xtics ytics mxtics mytics lw 1, lw 0.3\n"
      (gnuplot-settings output-set)
      "\n"
      "plot "
