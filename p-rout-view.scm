@@ -423,7 +423,7 @@
        "module_statuses.status" "module_statuses.module_id = 11")))
     ("events-table"
      ("events" ("header" "event") "header.time_send"
-      "Events"
+j      "Events"
       "Raw event strings" as-table)
      (("Event"
        "event.data" #f)))
@@ -516,7 +516,7 @@
       "Current/A" as-values)
      (('("I" (sub "charge"))
        "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
-      ("I_discharge"
+      ('("I" (sub "discharge"))
        "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
       ('("I" (sub "batt"))
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
