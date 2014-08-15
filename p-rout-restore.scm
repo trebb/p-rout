@@ -31,7 +31,8 @@
 	     (ice-9 getopt-long)
 	     (ice-9 pretty-print)
 	     (ice-9 match)
-	     (ice-9 rdelim))
+	     (ice-9 rdelim)
+	     (ice-9 popen))
 
 ;;; Return first line of file at path, or return #f
 (define (read-line-from-file path)
@@ -58,7 +59,7 @@
   -v, --verbose   Display debugging output
   --db-connection <user>:<pass>:<db>:<path/ip>[:port] (default:
                     p-rout:p-rout:p_rout:/run/postgres:localhost)
-  --log-dir       Log directory (default: \"log\")
+  --log-dir       Log directory (default: \"log-r\")
 ")
   (exit))
 
@@ -75,7 +76,7 @@
   (option-ref options
 	      'db-connection
 	      "p-rout:p-rout:p_rout:/run/postgres:localhost"))
-(define +log-dir+ (option-ref options 'log-dir "log"))
+(define +log-dir+ (option-ref options 'log-dir "log-r"))
 (define +dump-file+ (let ((args (option-ref options '() #f))) ;default broken
 		      (if (null? args) #f (car args))))
 (define *db* #f)
@@ -110,9 +111,30 @@
 
 (define (now) (date->string (current-date) "~4"))
 
-
 (define (dot-append . strings) (string-join strings "."))
 
+;;; Tell whether program is currently running
+(define (running-process? program)
+  (let ((ps-port #f))
+    (dynamic-wind
+      (lambda ()
+	(set! ps-port
+	      (open-input-pipe (string-append "ps -C " program " -o pid="))))
+      (lambda ()
+	(not (eof-object? (read-line ps-port))))
+      (lambda ()
+	(close-pipe ps-port)))))
+
+;;; Exit if program is currently running
+(define (exit-if-running-process program)
+  (when (running-process? program)
+    (display
+     (string-append "\
+There seems to be a running process by the name of " program " \
+which may attempt to write into the database during the restore operation.
+This could mess up the database; therefore, I'm giving up now.
+"))
+    (exit)))
 
 ;;; Send SQL query to database
 ;;; ignore-codes are expected database error codes that don't cause
@@ -271,14 +293,16 @@
 
 ;;; Maximum value of +record-id-column+ in db
 (define (max-record-id-column db)
-  (apply
-   max
-   (map (lambda (table)
-	  (logged-query
-	   db "restore" (string-append
-			 "SELECT max(" +record-id-column+ ") FROM " table))
-	  (cdar (dbi-get_row db)))
-	(tables db))))
+  (if (null? (tables db))
+      0
+      (apply
+       max
+       (map (lambda (table)
+	      (logged-query
+	       db "restore" (string-append
+			     "SELECT max(" +record-id-column+ ") FROM " table))
+	      (cdar (dbi-get_row db)))
+	    (tables db)))))
 
 (define (increase-record-id-column db table amount)
   (logged-query
@@ -297,6 +321,9 @@
      (increase-record-id-column db table amount))
    (tables db)))
 
+
+(exit-if-running-process "p-rout-collect.scm")
+
 (dynamic-wind
   (lambda () (set! *db* (dbi-open "postgresql" +db-connection+)))
   (lambda ()
@@ -304,13 +331,18 @@
       (lambda () (set! *temp-db* (temp-db)))
       (lambda ()
 	(psql-apply-dump *temp-db-name* +dump-file+)
-	(pretty-print *db*)
-	(pretty-print *temp-db*)
-	(pretty-print +dump-file+)
 	(increase-record-id-columns
 	 *temp-db*
-	 (+ (* 24 60) (max-record-id-column *db*)))
+	 (+ 1000 (max-record-id-column *db*)))
 	(dump-into (db-name) *temp-db-name*)
+	(display "\
+
+Hint: Messages saying
+  ERROR:  <some entity> already exists
+can be ignored.
+
+Pruning duplicates; please be patient.
+")
 	(delete-all-duplicates *db*))
       (lambda ()
 	(dbi-close *temp-db*)
