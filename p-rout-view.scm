@@ -576,6 +576,10 @@ j      "Events"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
       ("Solar produced"
        "module_statuses.param_11 / 1000" "module_statuses.module_id = 12")
+      ("Solar 1 produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 12")
+      ("Solar 2 produced"
+       "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
       ("L1 consumed"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
       ("L2 consumed"
