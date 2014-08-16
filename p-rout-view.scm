@@ -753,15 +753,41 @@ j      "Events"
 (define (sxml-date-input label default-date)
   `((label (@ (for ,label))
        ,(string-append label " "))
-  (input (@ (type "Text")
-	    (id ,label)
-	    (name ,label)
-	    (maxlength "16")
-	    (size "16")
-	    (value ,default-date)
-	    (onclick ,(string-append "javascript:NewCssCal('"
-				     label
-				     "','yyyyMMdd','dropdown',true,'24')"))))))
+    (input (@ (type "Text")
+	      (id ,label)
+	      (name ,label)
+	      (maxlength "16")
+	      (size "16")
+	      (value ,default-date)
+	      (onclick ,(string-append "javascript:NewCssCal('"
+				       label
+				       "','yyyyMMdd','dropdown',true,'24')"))))))
+
+;;; List of Powerrouters
+(define (powerrouters)
+  (logged-query "db" (string-append
+		      "SELECT powerrouter_id"
+		      " FROM logs.header"
+		      " GROUP BY powerrouter_id"
+		      " ORDER BY powerrouter_id"))
+  (do ((powerrouter (dbi-get_row *db*) (dbi-get_row *db*))
+       (powerrouters '()))
+      ((not powerrouter) powerrouters)
+    (set! powerrouters (cons (cdar powerrouter) powerrouters))))
+
+;;; SXML for the selection of a particular Powerrouter (if there are
+;;; Powerrouters to select from)
+(define (sxml-powerrouter-select)
+  (if (> (length (powerrouters)) 1)
+      `("PR Id "
+	,(list* 'select
+		'(@ (name "powerrouter-id"))
+		(map (lambda (powerrouter)
+		       `(option (@ (value ,powerrouter))
+				,powerrouter))
+		     (powerrouters)))
+	" ")
+      ""))
 
 ;;; SXML for a bunch of radio buttons for output sets of wanted-render-mode
 (define (sxml-output-set-inputs wanted-render-mode)
@@ -777,13 +803,22 @@ j      "Events"
 (define (sxml-latest-value-tables-div)
   `(div
     (@ (style "width:80%;" "margin:0 auto;" "text-align:center;"))
-    (h4 "Current Values")
-    ,(map (lambda (output-set)
-	    `(div
-	      '(@ (style "float:left;" "padding:10px 2px"))
-	      ,(get-latest-value-sxml-table output-set)))
-	  (filter (lambda (x) (eq? 'as-values (render-mode x)))
-		  (output-sets)))))
+    ,@(map
+       (lambda (powerrouter-id)
+	 `(div (@ (style "clear:both;" "padding-top:10px;"))
+	       (h4 "Current Values"
+		   ,(if (> (length (powerrouters)) 1)
+			(string-append " of " powerrouter-id)
+			"")
+		   " [" ,(current-value-date powerrouter-id) "]")
+	       ,@(map (lambda (output-set)
+			`(div
+			  (@ (style "float:left;" "padding:10px 2px"))
+			  ,(get-latest-value-sxml-table output-set
+							powerrouter-id)))
+		      (filter (lambda (x) (eq? 'as-values (render-mode x)))
+			      (output-sets)))))
+       (powerrouters))))
 
 (define (view-handler request body)
   (values (build-response #:code 200
@@ -805,10 +840,11 @@ j      "Events"
 		    "p-rout v" ,*version*
 		    (div
 		     (@ (style "text-align:center;"
-			  "margin:100px auto 100px auto;"))
+			  "margin:50px auto 50px auto;"))
 		     (form
 		      (@ (action "/view/render"))
-		      (p ,(sxml-date-input +from-label+ (first default-dates))
+		      (p ,(sxml-powerrouter-select)
+			 ,(sxml-date-input +from-label+ (first default-dates))
 			 " "
 			 ,(sxml-date-input +to-label+ (second default-dates)))
 		      (h4 "Diagrams")
@@ -839,6 +875,7 @@ j      "Events"
        (lambda ()
 	 (assert
 	  (plot-svg (cdr (assoc "output-set" query-alist))
+		    (cdr (assoc "powerrouter-id" query-alist))
 		    (normalize-date-string
 		     (uri-decode (cdr (assoc +from-label+ query-alist))))
 		    (normalize-date-string
@@ -862,6 +899,7 @@ j      "Events"
        (lambda ()
 	 (assert
 	  (tabulate (cdr (assoc "output-set" query-alist))
+		    (cdr (assoc "powerrouter-id" query-alist))
 		    (normalize-date-string
 		     (uri-decode (cdr (assoc +from-label+ query-alist))))
 		    (normalize-date-string
@@ -904,7 +942,8 @@ j      "Events"
 
 ;;; Return a SQL statement that fetches up to number-of-rows (date value) pairs
 ;;; for a curve from an output-set and from a time interval
-(define (get-sql-row-sql output-set curve-name from-date to-date number-of-rows)
+(define (get-sql-row-sql
+	 output-set curve-name powerrouter-id from-date to-date number-of-rows)
   (string-append
    "WITH t (row_number, date, value) AS"
    " (SELECT row_number() OVER (ORDER BY " (date-column output-set) ")"
@@ -919,6 +958,7 @@ j      "Events"
    " WHERE ("
    (date-column output-set)
    " BETWEEN '" from-date "' AND '" to-date "')"
+   " AND powerrouter_id = '" powerrouter-id "'"
    (let ((sql-where (sql-where output-set curve-name)))
      (if sql-where
 	 (string-append " AND " sql-where)
@@ -930,8 +970,9 @@ j      "Events"
    " LIMIT " (number->string number-of-rows)))
 
 ;;; Return data for one curve the way Gnuplot understands it
-(define (get-curve-points output-set curve-name from-date to-date)
+(define (get-curve-points output-set curve-name powerrouter-id from-date to-date)
   (let ((sql (get-sql-row-sql output-set curve-name
+			      powerrouter-id
 			      from-date to-date
 			      +diagram-number-of-values+)))
     (logged-query "db" sql)
@@ -951,8 +992,10 @@ j      "Events"
 
 ;;; date-column?=#t means return an html table column made of date/time
 (define (get-sxml-table-column
-	 output-set curve-name from-date to-date date-column?)
-  (let ((sql (get-sql-row-sql output-set curve-name
+	 output-set curve-name powerrouter-id from-date to-date date-column?)
+  (let ((sql (get-sql-row-sql output-set
+			      curve-name
+			      powerrouter-id
 			      from-date to-date
 			      +table-number-of-columns+)))
     (logged-query "db" sql)
@@ -973,31 +1016,43 @@ j      "Events"
 				     (cdr (assoc "value"
 						 sql-row)))))))))))))
 
+(define (get-current-value-sql output-set curve-name powerrouter-id)
+  (string-append
+   "WITH t (date, value) AS"
+   " (SELECT " (date-column output-set)
+   ", " (columnname output-set curve-name)
+   " FROM "
+   (let ((tables (tables output-set)))
+     (if (> (length tables) 1)
+	 (string-append (string-join tables " JOIN ")
+			" USING (" +record-id-column+ ")")
+	 (car tables)))
+   " WHERE header.powerrouter_id = '" powerrouter-id "'"
+   (let ((sql-where (sql-where output-set curve-name)))
+     (if sql-where
+	 (string-append " AND " sql-where)
+	 ""))
+   " ORDER BY " (date-column output-set) " DESC LIMIT 1"
+   ")"
+   " SELECT date, value FROM t"))
+
 ;;; A single sxml table row comprising curve-name, newest value
-(define (get-sxml-current-value-row output-set curve-name)
-  (let ((sql (string-append
-	      "WITH t (date, value) AS"
-	      " (SELECT " (date-column output-set)
-	      ", " (columnname output-set curve-name)
-	      " FROM "
-	      (let ((tables (tables output-set)))
-		(if (> (length tables) 1)
-		    (string-append (string-join tables " JOIN ")
-				   " USING (" +record-id-column+ ")")
-		    (car tables)))
-	      (let ((sql-where (sql-where output-set curve-name)))
-		(if sql-where
-		    (string-append " WHERE " sql-where)
-		    ""))
-	      " ORDER BY " (date-column output-set) " DESC LIMIT 1"
-	      ")"
-	      " SELECT date, value FROM t")))
-    (logged-query "db" sql)
+(define (get-sxml-current-value-row output-set curve-name powerrouter-id)
+  (logged-query
+   "db" (get-current-value-sql output-set curve-name powerrouter-id))
     `(tr (td ,curve-name)
 	 (td ,(cdr (assoc "value"
-			  (dbi-get_row *db*)))))))	
+			  (dbi-get_row *db*))))))
 
-(define (gnuplot-commands output-set from-date to-date)
+;;; Date of newest record for powerrouter-id
+(define (current-value-date powerrouter-id)
+  (let* ((output-set  (first (output-sets)))
+	 (curve-name (first (curve-names output-set))))
+    (logged-query
+     "db" (get-current-value-sql output-set curve-name powerrouter-id))
+    (humanize-date-string (cdr (assoc "date" (dbi-get_row *db*))))))
+
+(define (gnuplot-commands output-set powerrouter-id from-date to-date)
   (let* ((curve-names (curve-names output-set)))
     (string-append
      "set terminal 'svg' enhanced mouse jsdir '/view/lib/'"
@@ -1025,28 +1080,29 @@ j      "Events"
      "\n"
      (string-join
       (map (lambda (curve-name)
-	     (get-curve-points output-set curve-name from-date to-date))
+	     (get-curve-points
+	      output-set curve-name powerrouter-id from-date to-date))
 	   curve-names)
       ""))))
 
 ;;; Table of output-set with rows of latest values
-(define (get-latest-value-sxml-table output-set)
+(define (get-latest-value-sxml-table output-set powerrouter-id)
   (cons* 'table
 	 `(th (@ (colspan "2")) ,(table-title output-set))
 	 (map
 	  (lambda (curve-name)
-	    (get-sxml-current-value-row output-set curve-name))
+	    (get-sxml-current-value-row output-set curve-name powerrouter-id))
 	  (curve-names output-set))))
 
 ;;; Table of output-set with one line per date
-(define (get-sxml-table output-set from-date to-date)
+(define (get-sxml-table output-set powerrouter-id from-date to-date)
   (let* ((row-names (curve-names output-set))
 	 (row-lists
 	  (append
 	   `(,(get-sxml-table-column
-	       output-set (first row-names) from-date to-date #t))
+	       output-set (first row-names) powerrouter-id from-date to-date #t))
 	   (map (lambda (row-name)
-		  (get-sxml-table-column output-set row-name
+		  (get-sxml-table-column output-set row-name powerrouter-id
 					 from-date to-date #f))
 		row-names))))
     (cons 'table (apply map
@@ -1054,15 +1110,16 @@ j      "Events"
 			  (cons 'tr table-cells))
 			row-lists))))
 
-(define (plot-svg output-set from-date to-date)
+(define (plot-svg output-set powerrouter-id from-date to-date)
   (let* ((gp (run-with-pipe "r+" "gnuplot"))
 	 (gp-pid (car gp))
 	 (gp-in (cadr gp))
 	 (gp-out (cddr gp))
 	 (svg #f))
     (when +verbose+
-      (file-log "gnuplot" (gnuplot-commands output-set from-date to-date)))
-    (display (gnuplot-commands output-set from-date to-date)
+      (file-log "gnuplot" (gnuplot-commands
+			   output-set powerrouter-id from-date to-date)))
+    (display (gnuplot-commands output-set powerrouter-id from-date to-date)
 	     gp-out)
     (close gp-out)
     (set! svg (read-delimited "" gp-in))
@@ -1072,7 +1129,7 @@ j      "Events"
 	#f
 	svg)))
 
-(define (tabulate output-set from-date to-date)
+(define (tabulate output-set powerrouter-id from-date to-date)
   (with-output-to-string
     (lambda ()
       (display "<!DOCTYPE html>\n")
@@ -1085,7 +1142,7 @@ j      "Events"
 	 (body
 	  (div
 	   (@ (style "text-align:center;" "margin:auto auto 50px auto;"))
-	   ,(get-sxml-table output-set from-date to-date))))))))
+	   ,(get-sxml-table output-set powerrouter-id from-date to-date))))))))
 
 ;;; Create an index named <schema>.<table>_<column>_index if necessary
 (define (create-index schema table column)

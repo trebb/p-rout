@@ -10,9 +10,9 @@ server (logging1.powerrouter.com) that is owned by the manufacturer,
 who provides another HTTP server where customers can view their data.
 
 This project does basically the same while keeping everything on the
-owner's premises.  It provides a data-collecting HTTP server where the
-PowerRouter can upload.  Data is stored in a PostgreSQL database and
-can be reviewed on a second HTTP server.
+owner's premises.  It provides a data-collecting HTTP server where one
+or more PowerRouters can upload.  Data is stored in a PostgreSQL
+database and can be reviewed on a second HTTP server.
 
 P-rout is intended to be installed on a single-board computer with two
 network interfaces.
@@ -46,9 +46,9 @@ Configuration (on Arch Linux)
      find out its IP number. Make sure the IP number isn't allowed to
      change. (Let's suppose it's 192.168.178.1)
 
-(3)  Connect the PowerRouter to a dedicated (second) network interface
-     and find out the name of the interface.  (Let's suppose it's
-     called ens4v1.)
+(3)  Connect the PowerRouter(s) to a dedicated (second) network
+     interface and find out the name of the interface.  (Let's suppose
+     it's called ens4v1.)
 
 (4)  Use ./example/ens4v1_static as a template for
      /etc/netctl/ens4v1_static.  Edit the line that says
