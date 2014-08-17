@@ -782,16 +782,18 @@ j      "Events"
 ;;; SXML for the selection of a particular Powerrouter (if there are
 ;;; Powerrouters to select from)
 (define (sxml-powerrouter-select)
-  (if (> (length (powerrouters)) 1)
-      `("PR Id "
-	,(list* 'select
-		'(@ (name "powerrouter-id"))
-		(map (lambda (powerrouter)
-		       `(option (@ (value ,powerrouter))
-				,powerrouter))
-		     (powerrouters)))
-	" ")
-      ""))
+  `(span
+    (@ (,(if (> (length (powerrouters)) 1)
+	     'dummy
+	     'hidden)))
+    "PR Id "
+    ,(list* 'select
+	    '(@ (name "powerrouter-id"))
+	    (map (lambda (powerrouter)
+		   `(option (@ (value ,powerrouter))
+			    ,powerrouter))
+		 (powerrouters)))
+    " "))
 
 ;;; SXML for a bunch of radio buttons for output sets of wanted-render-mode
 (define (sxml-output-set-inputs wanted-render-mode)
