@@ -106,17 +106,20 @@ Configuration (on Arch Linux)
      place.  The dumps are created daily in /var/lib/p-rout/ and get
      deleted once they are older than 14 days.
 
-(12) To restore a database dump from an earlier instance of p-rout you
-     have two options:
+(12) Restoring a database dump from an earlier instance of p-rout:
 
-     (a) Before doing step (8), i.e. with a pristine database, run
+       p-rout-restore.scm <your-sql-dump>.gz.
 
-           zcat <your-sql-dump>.gz | psql -U p-rout p_rout.
+     Stop p-rout-collect while doing this.
 
-     (b) On a non-empty database you have to use the slower, more
-         secure command
+     Restoring a dump multiple times into the same database leaves you
+     with multiple instances of every record.  To get rid of such
+     duplicates, run
 
-	   p-rout-restore.scm <your-sql-dump>.gz.
+       p-rout-prune.scm.
+
+     (No need to stop p-rout-collect here.)
+
 
 Bugs
 ====
