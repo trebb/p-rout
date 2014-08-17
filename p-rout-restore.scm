@@ -321,6 +321,60 @@ This could mess up the database; therefore, I'm giving up now.
      (increase-record-id-column db table amount))
    (tables db)))
 
+;; ;;; Return a list of all columns in db, each in its own list
+;; ;;; (db schema table column)
+;; (define (all-columns db)
+;;   (append-map
+;;    (lambda (schema+table)
+;;      (let* ((schema+table-list (string-split schema+table #\.))
+;; 	    (schema (first schema+table-list))
+;; 	    (table (second schema+table-list)))
+;;        (map (lambda (column)
+;; 	      (list db schema table column))
+;; 	    (columns db schema table))))
+;;    (tables db)))
+
+;; ;;; Create an index named <schema>.<table>_<column>_index if necessary
+;; (define (create-index db schema table column)
+;;   (logged-query db "restore" (string-append
+;; 			      "SELECT "
+;; 			      "t.relname AS table_name, "
+;; 			      "i.relname AS index_name, "
+;; 			      "a.attname AS column_name, "
+;; 			      "n.nspname AS schema "
+;; 			      "FROM "
+;; 			      "pg_namespace n, pg_class t, "
+;; 			      "pg_class i, "
+;; 			      "pg_index ix, "
+;; 			      "pg_attribute a "
+;; 			      "WHERE "
+;; 			      "n.oid = t.relnamespace "
+;; 			      "AND t.oid = ix.indrelid "
+;; 			      "AND i.oid = ix.indexrelid "
+;; 			      "AND a.attrelid = t.oid "
+;; 			      "AND a.attnum = ANY(ix.indkey) "
+;; 			      "AND t.relkind = 'r' "
+;; 			      "AND n.nspname = '" schema "' "
+;; 			      "AND t.relname = '" table "' "
+;; 			      "AND a.attname = '" column "'"))
+;;   (unless (dbi-get_row *db*)
+;;     (logged-query db "restore" (string-append
+;; 				"CREATE INDEX " table "_" column "_index "
+;; 				"ON " schema "." table " (" column ")"))))
+
+;; (define (drop-index db schema table column)
+;;   (logged-query db "restore" (string-append
+;; 			      "DROP INDEX IF EXISTS " schema "." table "_" column "_index ")))
+
+;; (define (create-indexes db)
+;;   (for-each (lambda (args)
+;; 	      (apply create-index args))
+;; 	    (all-columns db)))
+
+;; (define (drop-indexes db)
+;;   (for-each (lambda (args)
+;; 	      (apply drop-index args))
+;; 	    (all-columns db)))
 
 (exit-if-running-process "p-rout-collect.scm")
 
@@ -343,10 +397,14 @@ can be ignored.
 
 Pruning duplicates; please be patient.
 ")
-	(delete-all-duplicates *db*))
+	;; (create-indexes *db*)
+	;; (delete-all-duplicates *db*)
+	)
       (lambda ()
 	(dbi-close *temp-db*)
 	(logged-query
 	 *db* "restore" (string-append "DROP DATABASE " *temp-db-name*)))))
-  (lambda () (dbi-close *db*)))
+  (lambda ()
+    ;; (drop-indexes *db*)
+    (dbi-close *db*)))
 
