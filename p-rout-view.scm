@@ -601,6 +601,132 @@ j      "Events"
       ("Grid sensor"
        "module_statuses.status" "module_statuses.module_id = 11")
       ("PR Id"
+       "header.powerrouter_id" "TRUE")))
+    ;; Raw values
+    ;; Parameter names should be strings without whitespace.
+    ("current-raw"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      ""
+      "" as-raw-values)
+     (("SOC/%" 
+       "module_statuses.param_5" "module_statuses.module_id = 136")
+      ("P_batt"
+       "module_statuses.param_2" "module_statuses.module_id = 136")
+      ("P_bus,batt"
+       "module_statuses.param_2" "module_statuses.module_id = 136")
+      ("P_local"
+       "module_statuses.param_6" "module_statuses.module_id = 9")
+      ("P_grid,dcac"
+       "module_statuses.param_2" "module_statuses.module_id = 9")
+      ("P_grid,platform"
+       "module_statuses.param_3" "module_statuses.module_id = 16")
+      ("P_solar"
+       "module_statuses.param_10" "module_statuses.module_id = 12")
+      ("P_1,solar"
+       "module_statuses.param_2" "module_statuses.module_id = 12")
+      ("P_2,solar"
+       "module_statuses.param_7" "module_statuses.module_id = 12")
+      ("P_L1"
+       "module_statuses.param_2" "module_statuses.module_id = 11")
+      ("P_L2"
+       "module_statuses.param_6" "module_statuses.module_id = 11")
+      ("P_L3"
+       "module_statuses.param_10" "module_statuses.module_id = 11")
+      ("V_local"
+       "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
+      ("V_grid,dcac"
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
+      ("V_bus,dcac"
+       "module_statuses.param_8 / 100" "module_statuses.module_id = 9")
+      ("V_grid,platform"
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
+      ("V_L1"
+       "module_statuses.param_0 / 10" "module_statuses.module_id = 11")
+      ("V_L2"
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 11")
+      ("V_L3"
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 11")
+      ("V_1,solar/V"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
+      ("V_2,solar/V"
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
+      ("V_charge/V"
+       "module_statuses.param_9 / 100" "module_statuses.module_id = 136")
+      ("V_discharge/V" 
+       "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
+      ("V_batt/V" 
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
+      ("I_charge"
+       "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
+      ("I_discharge"
+       "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
+      ("I_batt"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
+      ("I_1,solar"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 12")
+      ("I_2,solar"
+       "module_statuses.param_6 / 100" "module_statuses.module_id = 12")
+      ("I_L1"
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 11")
+      ("I_L2"
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 11")
+      ("I_L3"
+       "module_statuses.param_9 / 100" "module_statuses.module_id = 11")
+      ("f_dcac"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 9")
+      ("f_platform"
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 16")
+      ("T_dcac"
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
+      ("T_platform"
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16")
+      ("T_batt"
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
+      ("T_batt,module"
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
+      ("T_1,solar"
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 12")
+      ("T_2,solar"
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12")
+      ("W_platform,consumed"
+       "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
+      ("W_platform,produced"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
+      ("W_dcac,consumed"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
+      ("W_dcac,produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
+      ("W_local,dcac consumed"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
+      ("W_local,dcac produced"
+       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
+      ("W_battery,consumed"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 136")
+      ("W_battery,produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
+      ("W_solar,produced"
+       "module_statuses.param_11 / 1000" "module_statuses.module_id = 12")
+      ("W_solar,1 produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 12")
+      ("W_solar,2 produced"
+       "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
+      ("W_L1,consumed"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
+      ("W_L2,consumed"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 11")
+      ("W_L3,consumed"
+       "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")
+      ("status_platform"
+       "module_statuses.status" "module_statuses.module_id = 16")
+      ("status_battery"
+       "module_statuses.status" "module_statuses.module_id = 136")
+      ("status_dcac"
+       "module_statuses.status" "module_statuses.module_id = 9")
+      ("status_solar"
+       "module_statuses.status" "module_statuses.module_id = 12")
+      ("status_grid_sensor"
+       "module_statuses.status" "module_statuses.module_id = 11")
+      ("pr_id"
        "header.powerrouter_id" "TRUE")))))
 
 (define (output-sets)
@@ -745,6 +871,8 @@ j      "Events"
 	 (view-lib-datetimepicker-handler request body))
 	((equal? '("view" "lib") (uri-dir-elements request))
 	 (view-lib-handler request body))
+	((equal? '("view" "raw") (take (uri-elements request) 2))
+	 (view-raw-handler request body))
 	(else (not-found request))))
 
 ;;; Wrong URL
@@ -860,6 +988,14 @@ j      "Events"
 		      (p (input (@ (type "submit")
 				   (value "Go"))))))
 		    ,(sxml-latest-value-tables-div)))))))))
+
+(define (view-raw-handler request body)
+  (values (build-response #:code 200
+			  #:reason-phrase "Ok"
+			  #:headers `((content-type . (text/plain)) 
+				      (charset . "utf-8")))
+	  (let ((powerrouter-id (third (uri-elements request))))
+	    (get-raw-values-text "current-raw" powerrouter-id))))
 
 (define (view-render-handler request body)
   (let ((render-mode
@@ -1099,6 +1235,21 @@ j      "Events"
 	  (lambda (curve-name)
 	    (get-sxml-current-value-row output-set curve-name powerrouter-id))
 	  (curve-names output-set))))
+
+;;; String comprising lines of "name value"
+(define (get-raw-values-text output-set powerrouter-id)
+  (string-join
+   (map
+    (lambda (curve-name)
+      (logged-query
+       "db" (get-current-value-sql output-set curve-name powerrouter-id))
+      (with-output-to-string
+	(lambda ()
+	  (display curve-name)
+	  (display " ")
+	  (display (cdr (assoc "value" (dbi-get_row *db*)))))))
+    (curve-names output-set))
+   "\n"))
 
 ;;; Table of output-set with one line per date
 (define (get-sxml-table output-set powerrouter-id from-date to-date)
