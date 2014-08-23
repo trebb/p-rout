@@ -108,10 +108,10 @@ Configuration (on Arch Linux)
 (11) (Optional) For FHEM users (home automation software,
      http://fhem.org)
 
-     Find your fhem.cfg; add auto-generated configuration for
-     accessing P-rout:
+     Find your fhem.cfg.  Using the IP from (2), add auto-generated
+     configuration for accessing P-rout:
 
-       p-rout-view.scm --fhem-cfg >> path/to/fhem.cfg
+       p-rout-view.scm --addr=192.168.178.1 --fhem-cfg >> path/to/fhem.cfg
 
 
 (12) You may want to copy dumps of p-rout's collected data to a safe
