@@ -9,13 +9,16 @@ The appliance is connected to the Internet and uploads data to an HTTP
 server (logging1.powerrouter.com) that is owned by the manufacturer,
 who provides another HTTP server where customers can view their data.
 
-This project does basically the same while keeping everything on the
-owner's premises.  It provides a data-collecting HTTP server where one
-or more PowerRouters can upload.  Data is stored in a PostgreSQL
-database and can be reviewed on a second HTTP server.
+P-rout does basically the same while keeping everything on the owner's
+premises.  It provides a data-collecting HTTP server where one or more
+PowerRouters can upload.  Data is stored in a PostgreSQL database and
+can be reviewed on a second HTTP server.
 
-P-rout is intended to be installed on a single-board computer with two
-network interfaces.
+P-rout provides an optional raw data interface that can be accessed by
+the home automation software FHEM (http://fhem.org).
+
+The software is intended to be installed on a single-board computer
+with two network interfaces.
 
 
 Installation
@@ -92,7 +95,7 @@ Configuration (on Arch Linux)
 
      to learn about other options.
 
-(8)  Start p-rout services:
+(8)  Start P-rout services:
 
        systemctl enable p-rout-collect p-rout-view p-rout-dump.timer,
        systemctl start p-rout-collect p-rout-view p-rout-dump.timer.
@@ -102,11 +105,20 @@ Configuration (on Arch Linux)
 
 (10) Point your browser to http://192.168.178.1/view.  Enjoy.
 
-(11) You may want to copy dumps of p-rout's collected data to a safe
+(11) (Optional) For FHEM users (home automation software,
+     http://fhem.org)
+
+     Find your fhem.cfg; add auto-generated configuration for
+     accessing P-rout:
+
+       p-rout-view.scm --fhem-cfg >> path/to/fhem.cfg
+
+
+(12) You may want to copy dumps of p-rout's collected data to a safe
      place.  The dumps are created daily in /var/lib/p-rout/ and get
      deleted once they are older than 14 days.
 
-(12) Restoring a database dump from an earlier instance of p-rout:
+(13) Restoring a database dump from an earlier instance of p-rout:
 
        p-rout-restore.scm <your-sql-dump>.gz.
 

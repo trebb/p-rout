@@ -64,7 +64,8 @@
     (gnuplot-lib-dir (value #t))
     (lib-dir (value #t))
     (no-daemon)
-    (pid-file (value #t))))
+    (pid-file (value #t))
+    (fhem-cfg)))
 
 (define options (getopt-long (command-line) option-spec))
 
@@ -75,16 +76,17 @@
   -h, --help        Display this help
   -v, --verbose     Display debugging output
   -a, --addr        Address to listen on
-  -p, --port        Port to listen on
+  -p, --port        Port to listen on (default: 80)
   --db-connection   <user>:<pass>:<db>:<path/ip>[:port] (default:
                     p-rout:p-rout:p_rout:/run/postgres:localhost)
   --log-dir         Log directory (default: \"log-v\")
   --gnuplot-lib-dir Gnuplot's Javascript directory
   --lib-dir         p-rout-view's javascript directory (default:
-                      /usr/share/p-rout/)
+                    /usr/share/p-rout/)
   --no-daemon       Remain in foreground
   --pid-file        Store daemon's PID here (default:
-                      /var/run/p-rout/p-rout-view.pid)
+                    /var/run/p-rout/p-rout-view.pid)
+  --fhem-cfg        Write an FHEM configuration file fragment to stdout
 ")
   (exit))
 
@@ -603,28 +605,31 @@ j      "Events"
       ("PR Id"
        "header.powerrouter_id" "TRUE")))
     ;; Raw values
-    ;; Parameter names should be strings without whitespace.
+    ;; Parameter names should be alphanumeric (including '_') strings
+    ;; without whitespace.
     ("current-raw"
      ("logs" ("header" "module_statuses") "header.time_send"
       ""
       "" as-raw-values)
-     (("SOC/%" 
+     (("date"
+       "header.time_send" "TRUE")
+      ("SOC/percent"
        "module_statuses.param_5" "module_statuses.module_id = 136")
       ("P_batt"
        "module_statuses.param_2" "module_statuses.module_id = 136")
-      ("P_bus,batt"
+      ("P_bus_batt"
        "module_statuses.param_2" "module_statuses.module_id = 136")
       ("P_local"
        "module_statuses.param_6" "module_statuses.module_id = 9")
-      ("P_grid,dcac"
+      ("P_grid_dcac"
        "module_statuses.param_2" "module_statuses.module_id = 9")
-      ("P_grid,platform"
+      ("P_grid_platform"
        "module_statuses.param_3" "module_statuses.module_id = 16")
       ("P_solar"
        "module_statuses.param_10" "module_statuses.module_id = 12")
-      ("P_1,solar"
+      ("P_1_solar"
        "module_statuses.param_2" "module_statuses.module_id = 12")
-      ("P_2,solar"
+      ("P_2_solar"
        "module_statuses.param_7" "module_statuses.module_id = 12")
       ("P_L1"
        "module_statuses.param_2" "module_statuses.module_id = 11")
@@ -634,11 +639,11 @@ j      "Events"
        "module_statuses.param_10" "module_statuses.module_id = 11")
       ("V_local"
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
-      ("V_grid,dcac"
+      ("V_grid_dcac"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
-      ("V_bus,dcac"
+      ("V_bus_dcac"
        "module_statuses.param_8 / 100" "module_statuses.module_id = 9")
-      ("V_grid,platform"
+      ("V_grid_platform"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
       ("V_L1"
        "module_statuses.param_0 / 10" "module_statuses.module_id = 11")
@@ -646,9 +651,9 @@ j      "Events"
        "module_statuses.param_4 / 10" "module_statuses.module_id = 11")
       ("V_L3"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 11")
-      ("V_1,solar/V"
+      ("V_1_solar/V"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
-      ("V_2,solar/V"
+      ("V_2_solar/V"
        "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
       ("V_charge/V"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136")
@@ -662,9 +667,9 @@ j      "Events"
        "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
       ("I_batt"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
-      ("I_1,solar"
+      ("I_1_solar"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 12")
-      ("I_2,solar"
+      ("I_2_solar"
        "module_statuses.param_6 / 100" "module_statuses.module_id = 12")
       ("I_L1"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 11")
@@ -682,39 +687,39 @@ j      "Events"
        "module_statuses.param_2 / 10" "module_statuses.module_id = 16")
       ("T_batt"
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
-      ("T_batt,module"
+      ("T_batt_module"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
-      ("T_1,solar"
+      ("T_1_solar"
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12")
-      ("T_2,solar"
+      ("T_2_solar"
        "module_statuses.param_9 / 10" "module_statuses.module_id = 12")
-      ("W_platform,consumed"
+      ("W_platform_consumed"
        "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
-      ("W_platform,produced"
+      ("W_platform_produced"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
-      ("W_dcac,consumed"
+      ("W_dcac_consumed"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
-      ("W_dcac,produced"
+      ("W_dcac_produced"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
-      ("W_local,dcac consumed"
+      ("W_local_dcac_consumed"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
-      ("W_local,dcac produced"
+      ("W_local_dcac_produced"
        "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
-      ("W_battery,consumed"
+      ("W_battery_consumed"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 136")
-      ("W_battery,produced"
+      ("W_battery_produced"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
-      ("W_solar,produced"
+      ("W_solar_produced"
        "module_statuses.param_11 / 1000" "module_statuses.module_id = 12")
-      ("W_solar,1 produced"
+      ("W_solar_1_produced"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 12")
-      ("W_solar,2 produced"
+      ("W_solar_2_produced"
        "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
-      ("W_L1,consumed"
+      ("W_L1_consumed"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
-      ("W_L2,consumed"
+      ("W_L2_consumed"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 11")
-      ("W_L3,consumed"
+      ("W_L3_consumed"
        "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")
       ("status_platform"
        "module_statuses.status" "module_statuses.module_id = 16")
@@ -1236,20 +1241,24 @@ j      "Events"
 	    (get-sxml-current-value-row output-set curve-name powerrouter-id))
 	  (curve-names output-set))))
 
+;;; List of pairs of strings (name value)
+(define (get-raw-value-pairs output-set powerrouter-id)
+  (map
+   (lambda (curve-name)
+     (logged-query
+      "db" (get-current-value-sql output-set curve-name powerrouter-id))
+     (cons
+      curve-name
+      (with-output-to-string
+	(lambda () (display (cdr (assoc "value" (dbi-get_row *db*))))))))
+   (curve-names output-set)))
+
 ;;; String comprising lines of "name value"
 (define (get-raw-values-text output-set powerrouter-id)
-  (string-join
-   (map
-    (lambda (curve-name)
-      (logged-query
-       "db" (get-current-value-sql output-set curve-name powerrouter-id))
-      (with-output-to-string
-	(lambda ()
-	  (display curve-name)
-	  (display " ")
-	  (display (cdr (assoc "value" (dbi-get_row *db*)))))))
-    (curve-names output-set))
-   "\n"))
+  (map-to-string
+   (lambda (n raw-value-pair)
+     (string-append (car raw-value-pair) " " (cdr raw-value-pair) "\n"))
+   (get-raw-value-pairs output-set powerrouter-id)))
 
 ;;; Table of output-set with one line per date
 (define (get-sxml-table output-set powerrouter-id from-date to-date)
@@ -1329,6 +1338,77 @@ j      "Events"
 			"CREATE INDEX " table "_" column "_index "
 			"ON " schema "." table " (" column ");"))))
 
+
+;;; Return text, one piece per element of stuff, created in fun, a function
+;;; of the element number (as a string), and of the list element
+(define (map-to-string fun stuff . delimiter)
+  (let ((delimiter (if (null? delimiter) "" (car delimiter))))
+    (let ((line-number 0))
+      (string-join
+       (map (lambda (element)
+	      (set! line-number (1+ line-number))
+	      (let ((line-number-string (number->string line-number)))
+		(apply fun (list line-number-string element))))
+	    stuff)
+       delimiter))))
+
+;;; Return FHEM configuration
+(define (fhem-cfg)
+  (let ((powerrouter-count 0))
+    (string-join
+     (map
+      (lambda (powerrouter-id)
+	(set! powerrouter-count (1+ powerrouter-count))
+	(string-append
+	 "\n"
+	 "define P_ROUT_" powerrouter-id
+	 " HTTPMOD http://" +addr+ ":" (number->string +port+)
+	 "/view/raw/" powerrouter-id
+	 " 60\n"
+	 "attr P_ROUT_" powerrouter-id
+	 " alias p-rout-" (number->string powerrouter-count)
+	 "\n"
+	 (map-to-string
+	  (lambda (line-number name)
+	    (string-append
+	     "attr P_ROUT_" powerrouter-id
+	     " readingsName" line-number " " name "\n"))
+	  (curve-names "current-raw"))
+	 (map-to-string
+	  (lambda (line-number name)
+	    (string-append
+	     "attr P_ROUT_" powerrouter-id
+	     " readingsRegex" line-number " " name " (.*)" "\n"))
+	  (curve-names "current-raw"))
+	 "attr P_ROUT_" powerrouter-id " stateFormat {sprintf(\""
+	 (map-to-string
+	  (lambda (line-number name) (string-append name "=%s"))
+	  (curve-names "current-raw")
+	  ", ")
+	 "\", "
+	 (map-to-string
+	  (lambda (line-number name)
+	    (string-append "ReadingsVal($name, \"" name "\", 0)"))
+	  (curve-names "current-raw")
+	  ", ")
+	 ")}\n"))
+      (powerrouters))
+     "")))    
+
+;;; Open PostgreSQL database; do some preparation work
+(define (prepare-db)
+  (set! *db* (dbi-open "postgresql" +db-connection+))
+  (logged-query "db" "DROP CAST IF EXISTS (text AS double precision)")
+  (logged-query
+   "db" "CREATE CAST (text AS double precision) WITH INOUT AS IMPLICIT")
+  (for-each (lambda (names) (apply create-index names))
+	    +db-indexes+))
+
+(when (option-ref options 'fhem-cfg #f)
+  (prepare-db)
+  (display (fhem-cfg))
+  (exit))
+
 (unless +no-daemon+
   (let ((pid (primitive-fork)))
     (cond ((> pid 0)
@@ -1343,13 +1423,7 @@ j      "Events"
 
 (dynamic-wind
   (lambda ()
-    (set! *db* (dbi-open "postgresql" +db-connection+))
-    (logged-query "db" "DROP CAST IF EXISTS (text AS double precision)")
-    (logged-query
-     "db"
-     "CREATE CAST (text AS double precision) WITH INOUT AS IMPLICIT")
-    (for-each (lambda (names) (apply create-index names))
-	      +db-indexes+))
+    (prepare-db))
   (lambda ()
     (run-server p-rout-view
 		'http
