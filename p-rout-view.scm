@@ -161,11 +161,11 @@
       "Overview"
       "set keytitle '{/=12 Overview}'\n" as-diagram)
      (("P_{solar}/kW"
-       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
+       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red'")
       ("P_{grid,dcac}/kW"
-       "module_statuses.param_2 / 1000" "module_statuses.module_id = 9" "lines smooth bezier")
+       "module_statuses.param_2 / 1000" "module_statuses.module_id = 9" "lines")
       ("P_{grid,platform}/kW"
-       "module_statuses.param_3 / 1000" "module_statuses.module_id = 16" "lines smooth bezier")
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 16" "lines")
       ("SOC/100%" 
        "module_statuses.param_5 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")))
     ("battery-diagram"
@@ -173,13 +173,13 @@
       "Battery"
       "set keytitle '{/=12 Battery}'\n" as-diagram)
      (;; ("I_{charge}"
-      ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ;;  "module_statuses.param_10 / 100" "module_statuses.module_id = 136" "lines")
       ("V_{charge}/V"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines")
       ("I_{batt}/A"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lc rgb 'green'")
       ;; ("I_{discharge}" 
-      ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines smooth bezier")
+      ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines")
       ("V_{discharge}/V" 
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136" "lines")
       ("V_{batt}/V" 
@@ -193,67 +193,67 @@
       "Solar"
       "set keytitle '{/=12 Solar}'\n" as-diagram)
      (("P/kW"
-       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
+       "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red'")
       ("P_1/kW"
-       "module_statuses.param_2 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_2 / 1000" "module_statuses.module_id = 12" "lines")
       ("P_2/kW"
-       "module_statuses.param_7 / 1000" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 12" "lines")
       ("V_1/100V"
-       "module_statuses.param_0 / 10000" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_0 / 10000" "module_statuses.module_id = 12" "lines")
       ("V_2/100V"
-       "module_statuses.param_5 / 10000" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_5 / 10000" "module_statuses.module_id = 12" "lines")
       ("I_1/A"
-       "module_statuses.param_1 / 100" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_1 / 100" "module_statuses.module_id = 12" "lines")
       ("I_2/A"
-       "module_statuses.param_6 / 100" "module_statuses.module_id = 12" "lines smooth bezier")))
+       "module_statuses.param_6 / 100" "module_statuses.module_id = 12" "lines")))
     ("power-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Power"
       "set keytitle '{/=12 Power/W}'\n" as-diagram)
      (("P_{batt}"
-       "module_statuses.param_2" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
+       "module_statuses.param_2" "module_statuses.module_id = 136" "lines lc rgb 'green'")
       ("P_{local}"
-       "module_statuses.param_6" "module_statuses.module_id = 9" "lines smooth bezier")
+       "module_statuses.param_6" "module_statuses.module_id = 9" "lines")
       ("P_{grid,dcac}"
-       "module_statuses.param_2" "module_statuses.module_id = 9" "lines smooth bezier")
+       "module_statuses.param_2" "module_statuses.module_id = 9" "lines")
       ("P_{grid,platform}"
-       "module_statuses.param_3" "module_statuses.module_id = 16" "lines smooth bezier")
+       "module_statuses.param_3" "module_statuses.module_id = 16" "lines")
       ("P_{solar}"
-       "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red' smooth bezier")
+       "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red'")
       ("P_{1,solar}"
-       "module_statuses.param_2" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_2" "module_statuses.module_id = 12" "lines")
       ("P_{2,solar}"
-       "module_statuses.param_7" "module_statuses.module_id = 12" "lines smooth bezier")
+       "module_statuses.param_7" "module_statuses.module_id = 12" "lines")
       ("P_{L1}"
-       "module_statuses.param_2" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
+       "module_statuses.param_2" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange'")
       ("P_{L2}"
-       "module_statuses.param_6" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red' smooth bezier")
+       "module_statuses.param_6" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red'")
       ("P_{L3}"
-       "module_statuses.param_10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet' smooth bezier")))
+       "module_statuses.param_10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet'")))
     ("voltage-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "AC Voltage"
       "set keytitle '{/=12 AC Voltage/V}'\nset yrange [220:]\n" as-diagram)
      (("V_{local}"
-       "module_statuses.param_5 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
+       "module_statuses.param_5 / 10" "module_statuses.module_id = 9" "lines")
       ("V_{grid,dcac}"
-       "module_statuses.param_1 / 10" "module_statuses.module_id = 9" "lines smooth bezier")
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 9" "lines")
       ("V_{grid,platform}"
-       "module_statuses.param_1 / 10" "module_statuses.module_id = 16" "lines smooth bezier")
+       "module_statuses.param_1 / 10" "module_statuses.module_id = 16" "lines")
       ("V_{L1}"
-       "module_statuses.param_0 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange' smooth bezier")
+       "module_statuses.param_0 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange'")
       ("V_{L2}"
-       "module_statuses.param_4 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red' smooth bezier")
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'dark-red'")
       ("V_{L3}"
-       "module_statuses.param_8 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet' smooth bezier")))
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'violet'")))
     ("frequency-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Frequency"
       "set keytitle '{/=12 Frequency/Hz}'\n" as-diagram)
      (("f_{dcac}"
-       "module_statuses.param_0 / 100" "module_statuses.module_id = 9" "lines smooth bezier")
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 9" "lines")
       ("f_{platform}"
-       "module_statuses.param_0 / 100" "module_statuses.module_id = 16" "lines smooth bezier")))
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 16" "lines")))
     ("temperature-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Temperature"
@@ -263,7 +263,7 @@
       ("T_{platform}"
        "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green' smooth bezier")
       ("T_{batt}"
-       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green' smooth bezier")
+       "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")
       ("T_{batt,module}"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
       ("T_{1,solar}"
