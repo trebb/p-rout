@@ -906,7 +906,7 @@ j      "Events"
 		      "SELECT powerrouter_id"
 		      " FROM logs.header"
 		      " GROUP BY powerrouter_id"
-		      " ORDER BY powerrouter_id"))
+		      " ORDER BY powerrouter_id DESC"))
   (do ((powerrouter (dbi-get_row *db*) (dbi-get_row *db*))
        (powerrouters '()))
       ((not powerrouter) powerrouters)
