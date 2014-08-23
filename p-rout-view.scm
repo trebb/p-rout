@@ -287,6 +287,8 @@
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
       ('("V" (sub "batt") "/V" )
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
+      ('("P" (sub "batt") "/W")
+       "module_statuses.param_2" "module_statuses.module_id = 136")
       ('("T" (sub "batt") "/°C" )
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
       ("SOC/%" 
@@ -446,6 +448,8 @@ j      "Events"
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
       ('("V" (sub "batt") "/V" )
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
+      ('("P" (sub "batt") "/W")
+       "module_statuses.param_2" "module_statuses.module_id = 136")
       ('("T" (sub "batt") "/°C" )
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
       ("SOC/%" 
