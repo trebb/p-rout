@@ -1409,9 +1409,14 @@ j      "Events"
 	    +db-indexes+))
 
 (when (option-ref options 'fhem-cfg #f)
-  (prepare-db)
-  (display (fhem-cfg))
-  (exit))
+  (dynamic-wind
+    (lambda ()
+      (prepare-db))
+    (lambda ()
+      (display (fhem-cfg)))
+    (lambda ()
+      (dbi-close *db*)
+      (exit))))
 
 (unless +no-daemon+
   (let ((pid (primitive-fork)))
