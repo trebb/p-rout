@@ -609,7 +609,7 @@ j      "Events"
       ("PR Id"
        "header.powerrouter_id" "TRUE")))
     ;; Raw values
-    ;; Parameter names should be alphanumeric (including '_') strings
+    ;; Parameter names should be alphanumeric strings (including '_')
     ;; without whitespace.
     ("current-raw"
      ("logs" ("header" "module_statuses") "header.time_send"
@@ -619,41 +619,41 @@ j      "Events"
        "header.time_send" "TRUE")
       ("SOC/percent"
        "module_statuses.param_5" "module_statuses.module_id = 136")
-      ("P_batt"
+      ("P_batt/W"
        "module_statuses.param_2" "module_statuses.module_id = 136")
-      ("P_bus_batt"
+      ("P_bus_batt/W"
        "module_statuses.param_2" "module_statuses.module_id = 136")
-      ("P_local"
+      ("P_local/W"
        "module_statuses.param_6" "module_statuses.module_id = 9")
-      ("P_grid_dcac"
+      ("P_grid_dcac/W"
        "module_statuses.param_2" "module_statuses.module_id = 9")
-      ("P_grid_platform"
+      ("P_grid_platform/W"
        "module_statuses.param_3" "module_statuses.module_id = 16")
-      ("P_solar"
+      ("P_solar/W"
        "module_statuses.param_10" "module_statuses.module_id = 12")
-      ("P_1_solar"
+      ("P_1_solar/W"
        "module_statuses.param_2" "module_statuses.module_id = 12")
-      ("P_2_solar"
+      ("P_2_solar/W"
        "module_statuses.param_7" "module_statuses.module_id = 12")
-      ("P_L1"
+      ("P_L1/W"
        "module_statuses.param_2" "module_statuses.module_id = 11")
-      ("P_L2"
+      ("P_L2/W"
        "module_statuses.param_6" "module_statuses.module_id = 11")
-      ("P_L3"
+      ("P_L3/W"
        "module_statuses.param_10" "module_statuses.module_id = 11")
-      ("V_local"
+      ("V_local/V"
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
-      ("V_grid_dcac"
+      ("V_grid_dcac/V"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
-      ("V_bus_dcac"
+      ("V_bus_dcac/V"
        "module_statuses.param_8 / 100" "module_statuses.module_id = 9")
-      ("V_grid_platform"
+      ("V_grid_platform/V"
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
-      ("V_L1"
+      ("V_L1/V"
        "module_statuses.param_0 / 10" "module_statuses.module_id = 11")
-      ("V_L2"
+      ("V_L2/V"
        "module_statuses.param_4 / 10" "module_statuses.module_id = 11")
-      ("V_L3"
+      ("V_L3/V"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 11")
       ("V_1_solar/V"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
@@ -663,67 +663,67 @@ j      "Events"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136")
       ("V_discharge/V" 
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
-      ("V_batt/V" 
+      ("V_batt/V"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
-      ("I_charge"
+      ("I_charge/A"
        "module_statuses.param_10 / 100" "module_statuses.module_id = 136")
-      ("I_discharge"
+      ("I_discharge/A"
        "module_statuses.param_12 / 100" "module_statuses.module_id = 136")
-      ("I_batt"
+      ("I_batt/A"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136")
-      ("I_1_solar"
+      ("I_1_solar/A"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 12")
-      ("I_2_solar"
+      ("I_2_solar/A"
        "module_statuses.param_6 / 100" "module_statuses.module_id = 12")
-      ("I_L1"
+      ("I_L1/A"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 11")
-      ("I_L2"
+      ("I_L2/A"
        "module_statuses.param_5 / 100" "module_statuses.module_id = 11")
-      ("I_L3"
+      ("I_L3/A"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 11")
-      ("f_dcac"
+      ("f_dcac/Hz"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 9")
-      ("f_platform"
+      ("f_platform/Hz"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 16")
-      ("T_dcac"
+      ("T_dcac/degC"
        "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
-      ("T_platform"
+      ("T_platform/degC"
        "module_statuses.param_2 / 10" "module_statuses.module_id = 16")
-      ("T_batt"
+      ("T_batt/degC"
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
-      ("T_batt_module"
+      ("T_batt_module/degC"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
-      ("T_1_solar"
+      ("T_1_solar/degC"
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12")
-      ("T_2_solar"
+      ("T_2_solar/degC"
        "module_statuses.param_9 / 10" "module_statuses.module_id = 12")
-      ("W_platform_consumed"
+      ("W_platform_consumed/kWh"
        "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
-      ("W_platform_produced"
+      ("W_platform_produced/kWh"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
-      ("W_dcac_consumed"
+      ("W_dcac_consumed/kWh"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
-      ("W_dcac_produced"
+      ("W_dcac_produced/kWh"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
-      ("W_local_dcac_consumed"
+      ("W_local_dcac_consumed/kWh"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
-      ("W_local_dcac_produced"
+      ("W_local_dcac_produced/kWh"
        "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
-      ("W_battery_consumed"
+      ("W_battery_consumed/kWh"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 136")
-      ("W_battery_produced"
+      ("W_battery_produced/kWh"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
-      ("W_solar_produced"
+      ("W_solar_produced/kWh"
        "module_statuses.param_11 / 1000" "module_statuses.module_id = 12")
-      ("W_solar_1_produced"
+      ("W_solar_1_produced/kWh"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 12")
-      ("W_solar_2_produced"
+      ("W_solar_2_produced/kWh"
        "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
-      ("W_L1_consumed"
+      ("W_L1_consumed/kWh"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
-      ("W_L2_consumed"
+      ("W_L2_consumed/kWh"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 11")
-      ("W_L3_consumed"
+      ("W_L3_consumed/kWh"
        "module_statuses.param_11 / 1000" "module_statuses.module_id = 11")
       ("status_platform"
        "module_statuses.status" "module_statuses.module_id = 16")
@@ -1356,48 +1356,63 @@ j      "Events"
 	    stuff)
        delimiter))))
 
+;;; Build an attr line usable in FHEM configuration
+(define (fhem-attr powerrouter-id attr . values)
+  (string-append "attr P_ROUT_" powerrouter-id " " attr " "
+		 (string-join values "") "\n"))
+
 ;;; Return FHEM configuration
 (define (fhem-cfg)
   (let ((powerrouter-count 0))
-    (string-join
-     (map
-      (lambda (powerrouter-id)
-	(set! powerrouter-count (1+ powerrouter-count))
-	(string-append
-	 "\n"
-	 "define P_ROUT_" powerrouter-id
-	 " HTTPMOD http://" +addr+ ":" (number->string +port+)
-	 "/view/raw/" powerrouter-id
-	 " 60\n"
-	 "attr P_ROUT_" powerrouter-id
-	 " alias p-rout-" (number->string powerrouter-count)
-	 "\n"
-	 (map-to-string
-	  (lambda (line-number name)
-	    (string-append
-	     "attr P_ROUT_" powerrouter-id
-	     " readingsName" line-number " " name "\n"))
-	  (curve-names "current-raw"))
-	 (map-to-string
-	  (lambda (line-number name)
-	    (string-append
-	     "attr P_ROUT_" powerrouter-id
-	     " readingsRegex" line-number " " name " (.*)" "\n"))
-	  (curve-names "current-raw"))
-	 "attr P_ROUT_" powerrouter-id " stateFormat {sprintf(\""
-	 (map-to-string
-	  (lambda (line-number name) (string-append name "=%s"))
-	  (curve-names "current-raw")
-	  ", ")
-	 "\", "
-	 (map-to-string
-	  (lambda (line-number name)
-	    (string-append "ReadingsVal($name, \"" name "\", 0)"))
-	  (curve-names "current-raw")
-	  ", ")
-	 ")}\n"))
-      (powerrouters))
-     "")))    
+    (string-append
+     "\n"
+     "### BEGIN OF AUTO-GENERATED P-ROUT CONFIGURATION #############\n"
+     "### The generating command was:\n"
+     "### " (string-join (command-line)) "\n"
+     (string-join
+      (map
+       (lambda (powerrouter-id)
+	 (set! powerrouter-count (1+ powerrouter-count))
+	 (string-append
+	  "\n"
+	  "define P_ROUT_" powerrouter-id
+	  " HTTPMOD http://" +addr+ ":" (number->string +port+)
+	  "/view/raw/" powerrouter-id
+	  " 60\n"
+	  (fhem-attr
+	   powerrouter-id "alias" "p-rout-" (number->string powerrouter-count))
+	  (fhem-attr powerrouter-id "group" "powerrouters")
+	  (fhem-attr powerrouter-id "comment" "p-rout v" *version*)
+	  (map-to-string
+	   (lambda (line-number name)
+	     (fhem-attr powerrouter-id
+			(string-append "readingsName" line-number)
+			name))
+	   (curve-names "current-raw"))
+	  (map-to-string
+	   (lambda (line-number name)
+	     (fhem-attr powerrouter-id
+			(string-append "readingsRegex" line-number)
+			name " (.*)"))
+	   (curve-names "current-raw"))
+	  (fhem-attr powerrouter-id
+		     "stateFormat"
+		     "{sprintf(\""
+		     (map-to-string
+		      (lambda (line-number name) (string-append name "=%s"))
+		      (curve-names "current-raw")
+		      ", ")
+		     "\", "
+		     (map-to-string
+		      (lambda (line-number name)
+			(string-append "ReadingsVal($name, \"" name "\", 0)"))
+		      (curve-names "current-raw")
+		      ", ")
+		     ")}")))
+       (powerrouters))
+      "")
+     "\n"
+     "### END OF AUTO-GENERATED P-ROUT CONFIGURATION ##############\n")))
 
 ;;; Open PostgreSQL database; do some preparation work
 (define (prepare-db)
