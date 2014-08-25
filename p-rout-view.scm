@@ -160,14 +160,13 @@
      ("logs" ("header" "module_statuses") "header.time_send"
       "Overview"
       "set keytitle '{/=12 Overview}'\n" as-diagram)
-     (("P_{solar}/kW"
+     (("SOC/100%" 
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")("P_{solar}/kW"
        "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red'")
       ("P_{grid,dcac}/kW"
        "module_statuses.param_2 / 1000" "module_statuses.module_id = 9" "lines")
       ("P_{grid,platform}/kW"
-       "module_statuses.param_3 / 1000" "module_statuses.module_id = 16" "lines")
-      ("SOC/100%" 
-       "module_statuses.param_5 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")))
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 16" "lines")))
     ("battery-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Battery"
@@ -212,18 +211,18 @@
       "set keytitle '{/=12 Power/W}'\n" as-diagram)
      (("P_{batt}"
        "module_statuses.param_2" "module_statuses.module_id = 136" "lines lc rgb 'green'")
-      ("P_{local}"
-       "module_statuses.param_6" "module_statuses.module_id = 9" "lines")
-      ("P_{grid,dcac}"
-       "module_statuses.param_2" "module_statuses.module_id = 9" "lines")
-      ("P_{grid,platform}"
-       "module_statuses.param_3" "module_statuses.module_id = 16" "lines")
       ("P_{solar}"
        "module_statuses.param_10" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red'")
       ("P_{1,solar}"
        "module_statuses.param_2" "module_statuses.module_id = 12" "lines")
       ("P_{2,solar}"
        "module_statuses.param_7" "module_statuses.module_id = 12" "lines")
+      ("P_{local}"
+       "module_statuses.param_6" "module_statuses.module_id = 9" "lines")
+      ("P_{grid,dcac}"
+       "module_statuses.param_2" "module_statuses.module_id = 9" "lines")
+      ("P_{grid,platform}"
+       "module_statuses.param_3" "module_statuses.module_id = 16" "lines")
       ("P_{L1}"
        "module_statuses.param_2" "module_statuses.module_id = 11" "lines lw 2 lc rgb 'orange'")
       ("P_{L2}"
@@ -258,18 +257,18 @@
      ("logs" ("header" "module_statuses") "header.time_send"
       "Temperature"
       "set keytitle '{/=12 Temperature/°C}'\n" as-diagram)
-     (("T_{dcac}"
-       "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines lc rgb 'blue' smooth bezier")
-      ("T_{platform}"
-       "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green' smooth bezier")
-      ("T_{batt}"
+     (("T_{batt}"
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")
       ("T_{batt,module}"
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
       ("T_{1,solar}"
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")
       ("T_{2,solar}"
-       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'dark-red' smooth bezier")))
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'dark-red' smooth bezier")
+      ("T_{dcac}"
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines lc rgb 'blue' smooth bezier")
+      ("T_{platform}"
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green' smooth bezier")))
     ;; Tables
     ("battery-table"
      ("logs" ("header" "module_statuses") "header.time_send"
@@ -317,16 +316,18 @@
       "Power/W" as-table)
      (('("P" (sub "batt"))
        "module_statuses.param_2" "module_statuses.module_id = 136")
+      ('("P" (sub "solar"))
+       "module_statuses.param_10" "module_statuses.module_id = 12")
+      ('("P" (sub "1,solar"))
+       "module_statuses.param_2" "module_statuses.module_id = 12")
+      ('("P" (sub "2,solar"))
+       "module_statuses.param_7" "module_statuses.module_id = 12")
       ('("P" (sub "local"))
        "module_statuses.param_6" "module_statuses.module_id = 9")
       ('("P" (sub "grid,dcac"))
        "module_statuses.param_2" "module_statuses.module_id = 9")
       ('("P" (sub "grid,platform"))
        "module_statuses.param_3" "module_statuses.module_id = 16")
-      ('("P" (sub "1,solar"))
-       "module_statuses.param_2" "module_statuses.module_id = 12")
-      ('("P" (sub "2,solar"))
-       "module_statuses.param_7" "module_statuses.module_id = 12")
       ('("P" (sub "L1"))
        "module_statuses.param_2" "module_statuses.module_id = 11")
       ('("P" (sub "L2"))
@@ -339,16 +340,16 @@
       "Voltage/V" as-table)
      (('("V" (sub "batt" ))
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
+      ('("V" (sub "1,solar"))
+       "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
+      ('("V" (sub "2,solar"))
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
       ('("V" (sub "local"))
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
       ('("V" (sub "grid,dcac"))
        "module_statuses.param_1 / 10" "module_statuses.module_id = 9")
       ('("V" (sub "grid,platform"))
        "module_statuses.param_1 / 10" "module_statuses.module_id = 16")
-      ('("V" (sub "1,solar"))
-       "module_statuses.param_0 / 100" "module_statuses.module_id = 12")
-      ('("V" (sub "2,solar"))
-       "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
       ('("V" (sub "L1"))
        "module_statuses.param_0 / 10" "module_statuses.module_id = 11")
       ('("V" (sub "L2"))
@@ -367,35 +368,23 @@
      ("logs" ("header" "module_statuses") "header.time_send"
       "Temperature"
       "Temperature/°C" as-table)
-     (('("T" (sub "dcac"))
-       "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
-      ('("T" (sub "platform"))
-       "module_statuses.param_2 / 10" "module_statuses.module_id = 16")
-      ('("T" (sub "batt"))
+     (('("T" (sub "batt"))
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
       ('("T" (sub "batt,module"))
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
       ('("T" (sub "1,solar"))
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12")
       ('("T" (sub "2,solar"))
-       "module_statuses.param_9 / 10" "module_statuses.module_id = 12")))
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12")
+      ('("T" (sub "dcac"))
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
+      ('("T" (sub "platform"))
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16")))
     ("energy-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Energy"
       "Energy/kWh" as-table)
-     (("Platform consumed"
-       "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
-      ("Platform produced"
-       "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
-      ("DC/AC consumed"
-       "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
-      ("DC/AC produced"
-       "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
-      ("Local DC/AC consumed"
-       "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
-      ("Local DC/AC produced"
-       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
-      ("Battery consumed"
+     (("Battery consumed"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 136")
       ("Battery produced"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
@@ -405,6 +394,18 @@
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 12")
       ("Solar2 produced"
        "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
+      ("Local DC/AC consumed"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
+      ("Local DC/AC produced"
+       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
+      ("DC/AC consumed"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
+      ("DC/AC produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
+      ("Platform consumed"
+       "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
+      ("Platform produced"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
       ("L1 consumed"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
       ("L2 consumed"
@@ -415,14 +416,14 @@
      ("logs" ("header" "module_statuses") "header.time_send"
       "Status"
       "Raw status strings" as-table)
-     (("Platform"
-       "module_statuses.status" "module_statuses.module_id = 16")
-      ("DC/AC"
-       "module_statuses.status" "module_statuses.module_id = 9")
-      ("Battery"
+     (("Battery"
        "module_statuses.status" "module_statuses.module_id = 136")
       ("Solar"
        "module_statuses.status" "module_statuses.module_id = 12")
+      ("DC/AC"
+       "module_statuses.status" "module_statuses.module_id = 9")
+      ("Platform"
+       "module_statuses.status" "module_statuses.module_id = 16")
       ("Grid sensor"
        "module_statuses.status" "module_statuses.module_id = 11")))
     ("events-table"
@@ -480,18 +481,18 @@ j      "Events"
        "module_statuses.param_2" "module_statuses.module_id = 136")
       ('("P" (sub "bus,batt"))
        "module_statuses.param_2" "module_statuses.module_id = 136")
-      ('("P" (sub "local"))
-       "module_statuses.param_6" "module_statuses.module_id = 9")
-      ('("P" (sub "grid,dcac"))
-       "module_statuses.param_2" "module_statuses.module_id = 9")
-      ('("P" (sub "grid,platform"))
-       "module_statuses.param_3" "module_statuses.module_id = 16")
       ('("P" (sub "solar"))
        "module_statuses.param_10" "module_statuses.module_id = 12")
       ('("P" (sub "1,solar"))
        "module_statuses.param_2" "module_statuses.module_id = 12")
       ('("P" (sub "2,solar"))
        "module_statuses.param_7" "module_statuses.module_id = 12")
+      ('("P" (sub "local"))
+       "module_statuses.param_6" "module_statuses.module_id = 9")
+      ('("P" (sub "grid,dcac"))
+       "module_statuses.param_2" "module_statuses.module_id = 9")
+      ('("P" (sub "grid,platform"))
+       "module_statuses.param_3" "module_statuses.module_id = 16")
       ('("P" (sub "L1"))
        "module_statuses.param_2" "module_statuses.module_id = 11")
       ('("P" (sub "L2"))
@@ -501,7 +502,7 @@ j      "Events"
     ("current-voltage"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Voltage"
-      "Voltage/V" as-values)
+      "AC Voltage/V" as-values)
      (('("V" (sub "local"))
        "module_statuses.param_5 / 10" "module_statuses.module_id = 9")
       ('("V" (sub "grid,dcac"))
@@ -548,35 +549,23 @@ j      "Events"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Temperature"
       "Temperature/°C" as-values)
-     (('("T" (sub "dcac"))
-       "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
-      ('("T" (sub "platform"))
-       "module_statuses.param_2 / 10" "module_statuses.module_id = 16")
-      ('("T" (sub "batt"))
+     (('("T" (sub "batt"))
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
       ('("T" (sub "batt,module"))
        "module_statuses.param_8 / 10" "module_statuses.module_id = 136")
       ('("T" (sub "1,solar"))
        "module_statuses.param_4 / 10" "module_statuses.module_id = 12")
       ('("T" (sub "2,solar"))
-       "module_statuses.param_9 / 10" "module_statuses.module_id = 12")))
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12")
+      ('("T" (sub "dcac"))
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9")
+      ('("T" (sub "platform"))
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16")))
     ("current-energy"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Energy"
       "Energy/kWh" as-values)
-     (("Platform consumed"
-       "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
-      ("Platform produced"
-       "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
-      ("DC/AC consumed"
-       "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
-      ("DC/AC produced"
-       "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
-      ("Local DC/AC consumed"
-       "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
-      ("Local DC/AC produced"
-       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
-      ("Battery consumed"
+     (("Battery consumed"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 136")
       ("Battery produced"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 136")
@@ -586,6 +575,18 @@ j      "Events"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 12")
       ("Solar 2 produced"
        "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
+      ("Local DC/AC consumed"
+       "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
+      ("Local DC/AC produced"
+       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
+      ("DC/AC consumed"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
+      ("DC/AC produced"
+       "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
+      ("Platform consumed"
+       "module_statuses.param_5 / 1000" "module_statuses.module_id = 16")
+      ("Platform produced"
+       "module_statuses.param_4 / 1000" "module_statuses.module_id = 16")
       ("L1 consumed"
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 11")
       ("L2 consumed"
@@ -596,14 +597,14 @@ j      "Events"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Status"
       "Status" as-values)
-     (("Platform"
-       "module_statuses.status" "module_statuses.module_id = 16")
-      ("Battery"
+     (("Battery"
        "module_statuses.status" "module_statuses.module_id = 136")
-      ("DC/AC"
-       "module_statuses.status" "module_statuses.module_id = 9")
       ("Solar"
        "module_statuses.status" "module_statuses.module_id = 12")
+      ("DC/AC"
+       "module_statuses.status" "module_statuses.module_id = 9")
+      ("Platform"
+       "module_statuses.status" "module_statuses.module_id = 16")
       ("Grid sensor"
        "module_statuses.status" "module_statuses.module_id = 11")
       ("PR Id"
