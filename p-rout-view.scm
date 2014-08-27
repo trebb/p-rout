@@ -428,7 +428,7 @@
        "module_statuses.status" "module_statuses.module_id = 11")))
     ("events-table"
      ("events" ("header" "event") "header.time_send"
-j      "Events"
+      "Events"
       "Raw event strings" as-table)
      (("Event"
        "event.data" #f)))
