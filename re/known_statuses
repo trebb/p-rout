@@ -1,0 +1,79 @@
+SELECT status FROM logs.module_statuses
+WHERE module_id = <module_id>
+GROUP BY status ORDER BY status;
+
+
+DC/AC; module_id = 9
+
+ status   meaning 
+------------------
+ 1041
+ 1043
+ 16147
+ 3091
+ 3347
+ 7187
+ 7699
+ 7955
+
+
+
+Grid sensor; module_id = 11
+
+ status   meaning 
+------------------
+ 1299
+ 1555
+
+
+Solar; module_id = 12
+
+ status   meaning 
+------------------
+ 144
+ 16
+ 17
+ 32769
+ 32771
+ 32773
+ 32789
+ 32835
+ 33859
+ 49219
+ 50243
+
+
+Platform; module_id = 16
+
+ status   meaning 
+------------------
+ 16403
+ 18451
+ 18691
+ 18707
+ 19219
+ 19731
+ 20243
+ 20499
+ 22547
+ 22803
+ 23827
+
+
+
+Battery; module_id = 136
+
+ status   meaning 
+------------------
+ 16641
+ 16643
+ 16707
+ 17731
+ 18755
+ 19779
+ 20737
+ 20801
+ 20803
+ 22785
+ 22787
+ 22851
