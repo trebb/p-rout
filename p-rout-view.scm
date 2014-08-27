@@ -291,7 +291,9 @@
       ('("T" (sub "batt") "/°C" )
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
       ("SOC/%" 
-       "module_statuses.param_5" "module_statuses.module_id = 136")))
+       "module_statuses.param_5" "module_statuses.module_id = 136")
+      ("Status"
+       "module_statuses.status" "module_statuses.module_id = 136")))
     ("solar-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Solar"
@@ -309,31 +311,43 @@
       ('("I" (sub "1") "/A")
        "module_statuses.param_1 / 100" "module_statuses.module_id = 12")
       ('("I" (sub "2") "/A")
-       "module_statuses.param_6 / 100" "module_statuses.module_id = 12")))
+       "module_statuses.param_6 / 100" "module_statuses.module_id = 12")
+      ("Status"
+       "module_statuses.status" "module_statuses.module_id = 12")))
     ("power-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Power"
       "Power/W" as-table)
      (('("P" (sub "batt"))
        "module_statuses.param_2" "module_statuses.module_id = 136")
+      ('("Stat" (sub "batt"))
+       "module_statuses.status" "module_statuses.module_id = 136")
       ('("P" (sub "solar"))
        "module_statuses.param_10" "module_statuses.module_id = 12")
       ('("P" (sub "1,solar"))
        "module_statuses.param_2" "module_statuses.module_id = 12")
       ('("P" (sub "2,solar"))
        "module_statuses.param_7" "module_statuses.module_id = 12")
+      ('("Stat" (sub "solar"))
+       "module_statuses.status" "module_statuses.module_id = 12")
       ('("P" (sub "local"))
        "module_statuses.param_6" "module_statuses.module_id = 9")
       ('("P" (sub "grid,dcac"))
        "module_statuses.param_2" "module_statuses.module_id = 9")
+      ('("Stat" (sub "dcac"))
+       "module_statuses.status" "module_statuses.module_id = 9")
       ('("P" (sub "grid,platform"))
        "module_statuses.param_3" "module_statuses.module_id = 16")
+      ('("Stat" (sub "platform"))
+       "module_statuses.status" "module_statuses.module_id = 16")
       ('("P" (sub "L1"))
        "module_statuses.param_2" "module_statuses.module_id = 11")
       ('("P" (sub "L2"))
        "module_statuses.param_6" "module_statuses.module_id = 11")
       ('("P" (sub "L3"))
-       "module_statuses.param_10" "module_statuses.module_id = 11")))
+       "module_statuses.param_10" "module_statuses.module_id = 11")
+      ('("Stat" (sub "grid_sensor"))
+       "module_statuses.status" "module_statuses.module_id = 11")))
     ("voltage-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Voltage"
