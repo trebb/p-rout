@@ -876,12 +876,16 @@
 	 (day (date-day now))
 	 (hour (date-hour now))
 	 (zone-offset (date-zone-offset now))
-	 (latest-halfday-hour (- hour (modulo hour 12))))
+	 (latest-halfday-hour (- hour (modulo hour 12)))
+         (latest-halfday-time
+          (date->time-utc
+           (make-date 0 0 0 latest-halfday-hour day month year zone-offset)))
+         (one-day (make-time time-duration 0 (* 24 3600))))
     (map
-     (lambda (date) (date->string date "~Y-~m-~dT~H:~M"))
-     (list 
-      (make-date 0 0 0 latest-halfday-hour (1- day) month year zone-offset)
-      (make-date 0 0 0 latest-halfday-hour (1+ day) month year zone-offset)))))
+     (lambda (time) (date->string (time-utc->date time) "~Y-~m-~dT~H:~M"))
+     (list
+      (subtract-duration latest-halfday-time one-day)
+      (add-duration latest-halfday-time one-day)))))
 
 (define (p-rout-view request body)
   (when +verbose+
