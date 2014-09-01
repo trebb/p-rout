@@ -65,15 +65,15 @@ Battery; module_id = 136
 
  status   meaning 
 ------------------
- 16641
- 16643
- 16707
- 17731
- 18755
- 19779
- 20737
- 20801
- 20803
- 22785
- 22787
- 22851
+ 16641    idle
+ 16643    discharge
+ 16707    charge; discharge
+ 17731    charge weakly; discharge weakly
+ 18755    charge; discharge weakly    
+ 19779    charge
+ 20737    idle
+ 20801    idle
+ 20803    charge weakly; discharge weakly
+ 22785    idle
+ 22787    discharge weakly
+ 22851    charge
