@@ -1,6 +1,7 @@
 [Unit]
 Description=P-rout-collect Daemon
-After=network.target
+Requires=posgresql.service
+After=network.target postgresql.service
 
 [Service]
 Type=forking
