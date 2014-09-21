@@ -1,6 +1,6 @@
 [Unit]
 Description=P-rout-collect Daemon
-Requires=posgresql.service
+Requires=postgresql.service
 After=network.target postgresql.service
 
 [Service]
