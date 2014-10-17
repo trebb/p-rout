@@ -248,7 +248,7 @@
     ("frequency-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Frequency"
-      "set keytitle '{/=12 Frequency/Hz}'\n" as-diagram)
+      "set keytitle '{/=12 Frequency/Hz}'\nset yrange [48:]" as-diagram)
      (("f_{dcac}"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 9" "lines")
       ("f_{platform}"
