@@ -260,15 +260,15 @@
      (("T_{batt}"
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")
       ("T_{batt,module}"
-       "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green' smooth bezier")
+       "module_statuses.param_8 / 10" "module_statuses.module_id = 136" "lines lc rgb 'green'")
       ("T_{1,solar}"
-       "module_statuses.param_4 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red' smooth bezier")
+       "module_statuses.param_4 / 10" "module_statuses.module_id = 12" "lines lc rgb 'red'")
       ("T_{2,solar}"
-       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'dark-red' smooth bezier")
+       "module_statuses.param_9 / 10" "module_statuses.module_id = 12" "lines lc rgb 'dark-red'")
       ("T_{dcac}"
-       "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines lc rgb 'blue' smooth bezier")
+       "module_statuses.param_10 / 10" "module_statuses.module_id = 9" "lines lc rgb 'blue'")
       ("T_{platform}"
-       "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green' smooth bezier")))
+       "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green'")))
     ;; Tables
     ("battery-table"
      ("logs" ("header" "module_statuses") "header.time_send"
