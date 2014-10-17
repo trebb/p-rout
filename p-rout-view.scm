@@ -930,9 +930,11 @@
 		      " FROM logs.header"
 		      " GROUP BY powerrouter_id"
 		      " ORDER BY powerrouter_id DESC"))
-  (do ((powerrouter (dbi-get_row *db*) (dbi-get_row *db*))
+  (do ((powerrouter (dbi-get_row *db*)
+		    (dbi-get_row *db*))
        (powerrouters '()))
-      ((not powerrouter) powerrouters)
+      ((not powerrouter)
+       powerrouters)
     (set! powerrouters (cons (cdar powerrouter) powerrouters))))
 
 ;;; SXML for the selection of a particular Powerrouter (if there are
@@ -1149,7 +1151,8 @@
     (do ((row (dbi-get_row *db*)
 	      (dbi-get_row *db*))
 	 (result ""))
-	((not row) (string-append result "e\n"))
+	((not row)
+	 (string-append result "e\n"))
       (set! result
 	    (string-append
 	     result
@@ -1174,7 +1177,8 @@
 	 (result `( ,(if date-column?
 			 `(th ,(table-title output-set))
 			 `(td ,curve-name)))))
-	((not sql-row) result)
+	((not sql-row)
+	 result)
       (set! result
 	    (append
 	     result
@@ -1210,17 +1214,23 @@
 (define (get-sxml-current-value-row output-set curve-name powerrouter-id)
   (logged-query
    "db" (get-current-value-sql output-set curve-name powerrouter-id))
+  (let ((row (dbi-get_row *db*)))
     `(tr (td ,curve-name)
-	 (td ,(cdr (assoc "value"
-			  (dbi-get_row *db*))))))
+	 (td ,(if row
+		  (cdr (assoc "value" row))
+		  "0")))))
 
 ;;; Date of newest record for powerrouter-id
 (define (current-value-date powerrouter-id)
-  (let* ((output-set  (first (output-sets)))
-	 (curve-name (first (curve-names output-set))))
-    (logged-query
-     "db" (get-current-value-sql output-set curve-name powerrouter-id))
-    (humanize-date-string (cdr (assoc "date" (dbi-get_row *db*))))))
+  (do ((i 0 (1+ i))			;skip missing PR modules
+       (row #f))
+      (row
+       (humanize-date-string (cdr (assoc "date" row))))
+    (let* ((output-set (list-ref (output-sets) i))
+	   (curve-name (first (curve-names output-set))))
+      (logged-query
+       "db" (get-current-value-sql output-set curve-name powerrouter-id))
+      (set! row (dbi-get_row *db*)))))
 
 (define (gnuplot-commands output-set powerrouter-id from-date to-date)
   (let* ((curve-names (curve-names output-set)))
@@ -1270,10 +1280,14 @@
    (lambda (curve-name)
      (logged-query
       "db" (get-current-value-sql output-set curve-name powerrouter-id))
-     (cons
-      curve-name
-      (with-output-to-string
-	(lambda () (display (cdr (assoc "value" (dbi-get_row *db*))))))))
+     (let ((row (dbi-get_row *db*)))
+       (cons
+	curve-name
+	(with-output-to-string
+	  (lambda () (display
+		      (if row
+			  (cdr (assoc "value" row))
+			  "0")))))))
    (curve-names output-set)))
 
 ;;; String comprising lines of "name value"
@@ -1285,19 +1299,28 @@
 
 ;;; Table of output-set with one line per date
 (define (get-sxml-table output-set powerrouter-id from-date to-date)
-  (let* ((row-names (curve-names output-set))
-	 (row-lists
-	  (append
-	   `(,(get-sxml-table-column
-	       output-set (first row-names) powerrouter-id from-date to-date #t))
-	   (map (lambda (row-name)
-		  (get-sxml-table-column output-set row-name powerrouter-id
-					 from-date to-date #f))
-		row-names))))
+  (let* ((column-names (curve-names output-set))
+	 (date-column
+	  (do ((i 0 (1+ i))   ;find a date column that actually exists
+	       (column '(())))
+	      ((not (null? (cdr column)))
+	       `(,column))
+	    (set! column
+		  (get-sxml-table-column
+		   output-set (list-ref column-names i) powerrouter-id
+		   from-date to-date #t))))
+	 (value-columns
+	  (filter
+	   (lambda (x) (not (null? (cdr x)))) ;get rid of non-existent columns
+	   (map (lambda (column-name)
+		  (get-sxml-table-column
+		   output-set column-name powerrouter-id from-date to-date #f))
+		column-names)))
+	 (all-columns (append date-column value-columns)))
     (cons 'table (apply map
 			(lambda (. table-cells)
 			  (cons 'tr table-cells))
-			row-lists))))
+			all-columns))))
 
 (define (plot-svg output-set powerrouter-id from-date to-date)
   (let* ((gp (run-with-pipe "r+" "gnuplot"))
