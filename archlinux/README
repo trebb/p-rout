@@ -1,15 +1,27 @@
 Packaging for Arch Linux
 ========================
 
-(1) Run updpkgsums in this directory.
+(1) Prepare the temporary packaging directory:
 
-(2) Run makepkg in this directory.
+      mkdir /tmp/packaging
+      cd /tmp/packaging
+      git clone ssh://aur@aur.archlinux.org/p-rout-git.git
 
-(3) Run mkaurball in this directory.
+(2) From the directory containing this README, copy everything except
+    this README into /tmp/packaging/p-rout-git/.
 
-Both (1) and (2) will alter the PKGBUILD file.  Ignore/revert these
-changes before committing to git.
-    
+(3) In /tmp/packaging/p-rout-git/, run
+
+      updpkgsums
+      mksrcinfo
+
+(4) Publish the new package:
+
+      cd /tmp/packaging/p-rout-git/
+      git add .
+      git commit -m "New version"
+      git push
+
 
 Installing on Arch Linux
 ========================
@@ -52,11 +64,11 @@ Installing on Arch Linux
 
       su p-rout
       cd
-      wget https://aur.archlinux.org/packages/gu/guile-dbi/guile-dbi.tar.gz
-      wget https://aur.archlinux.org/packages/gu/guile-dbd-postgresql/guile-dbd-postgresql.tar.gz
-      wget https://aur.archlinux.org/packages/gu/guile-lib/guile-lib.tar.gz
-      wget https://aur.archlinux.org/packages/gu/guile-json/guile-json.tar.gz
-      wget https://aur.archlinux.org/packages/p-/p-rout-git/p-rout-git.tar.gz
+      wget https://aur.archlinux.org/cgit/aur.git/snapshot/guile-dbi.tar.gz
+      wget https://aur.archlinux.org/cgit/aur.git/snapshot/guile-dbd-postgresql.tar.gz
+      wget https://aur.archlinux.org/cgit/aur.git/snapshot/guile-lib.tar.gz
+      wget https://aur.archlinux.org/cgit/aur.git/snapshot/guile-json.tar.gz
+      wget https://aur.archlinux.org/cgit/aur.git/snapshot/p-rout-git.tar.gz
 
 (7) Unpack tar files from (6):
 
