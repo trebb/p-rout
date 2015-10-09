@@ -410,8 +410,6 @@
        "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
       ("Local DC/AC consumed"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
-      ("Local DC/AC produced"
-       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
       ("DC/AC consumed"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
       ("DC/AC produced"
@@ -591,8 +589,6 @@
        "module_statuses.param_8 / 1000" "module_statuses.module_id = 12")
       ("Local DC/AC consumed"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
-      ("Local DC/AC produced"
-       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
       ("DC/AC consumed"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 9")
       ("DC/AC produced"
@@ -722,8 +718,6 @@
        "module_statuses.param_3 / 1000" "module_statuses.module_id = 9")
       ("W_local_dcac_consumed/kWh"
        "module_statuses.param_7 / 1000" "module_statuses.module_id = 9")
-      ("W_local_dcac_produced/kWh"
-       "module_statuses.param_6 / 1000" "module_statuses.module_id = 9")
       ("W_battery_consumed/kWh"
        "module_statuses.param_4 / 1000" "module_statuses.module_id = 136")
       ("W_battery_produced/kWh"
