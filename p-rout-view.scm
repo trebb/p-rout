@@ -2,7 +2,7 @@
 !#
 
 ;;;; Copyright (c) 2014 Bert Burgemeister  trebbu@googlemail.com
-;;;; 
+;;;;
 ;;;; Permission is hereby granted, free of charge, to any person
 ;;;; obtaining a copy of this software and associated documentation
 ;;;; files (the "Software"), to deal in the Software without
@@ -11,10 +11,10 @@
 ;;;; copies of the Software, and to permit persons to whom the
 ;;;; Software is furnished to do so, subject to the following
 ;;;; conditions:
-;;;; 
+;;;;
 ;;;; The above copyright notice and this permission notice shall be
 ;;;; included in all copies or substantial portions of the Software.
-;;;; 
+;;;;
 ;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 ;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -124,9 +124,20 @@
 (define *db* #f)
 
 (define +db-indexes+			;((schema table column) ...)
-  '(("logs" "header" "p_rout_id")
-    ("logs" "header" "time_send")
-    ("logs" "module_statuses" "p_rout_id")))
+  '(("logs" "header" "p_rout_id" #f)
+    ("logs" "header" "time_send" #f)
+    ("logs" "module_statuses" "p_rout_id" #f)
+    ;; ("logs" "module_statuses" "ABS(param_2)" "module_id = 136")
+    ;; ("logs" "module_statuses" "ABS(param_10)" "module_id = 12")
+    ("logs" "module_statuses" "param_2" "module_id = 9")
+    ("logs" "module_statuses" "param_10" "module_id = 12")
+    ("logs" "module_statuses" "param_1" "module_id = 16")
+    ;; ("logs" "module_statuses" "param_5" "module_id = 136")
+    ;; ("logs" "module_statuses" "param_2" "module_id = 136")
+    ;; ("logs" "module_statuses" "param_6" "module_id = 9")
+    ("logs" "module_statuses" "p_rout_id" "module_id = 9")
+    ("logs" "module_statuses" "p_rout_id" "module_id = 12")
+    ("logs" "module_statuses" "p_rout_id" "module_id = 136")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -156,12 +167,23 @@
 ;;;   ...)
 (define +output-sets+
   '(;; Diagrams
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (<output-set-name>
+    ;;  (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+    ;;                <indexpage-title>
+    ;;                <gnuplot-diagram-title> as-diagram)
+    ;;  ((<gnuplot-curve1-title>
+    ;;    <SQL-value1-column> <SQL-WHERE> <gnuplot-curve1-style>)
+    ;;   (<gnuplot-curve2-title>
+    ;;    <SQL-value2-column> <SQL-WHERE> <gnuplot-curve2-style>)
+    ;;   ...))
     ("overview-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Overview"
       "set keytitle '{/=12 Overview}'\n" as-diagram)
-     (("SOC/100%" 
-       "module_statuses.param_5 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")("P_{solar}/kW"
+     (("SOC/100%"
+       "module_statuses.param_5 / 100" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")
+      ("P_{solar}/kW"
        "module_statuses.param_10 / 1000" "module_statuses.module_id = 12" "lines lw 2 lc rgb 'red'")
       ("P_{grid,dcac}/kW"
        "module_statuses.param_2 / 1000" "module_statuses.module_id = 9" "lines")
@@ -177,15 +199,15 @@
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136" "lines")
       ("I_{batt}/A"
        "module_statuses.param_1 / 100" "module_statuses.module_id = 136" "lines lc rgb 'green'")
-      ;; ("I_{discharge}" 
+      ;; ("I_{discharge}"
       ;;  "module_statuses.param_12 / 100" "module_statuses.module_id = 136" "lines")
-      ("V_{discharge}/V" 
+      ("V_{discharge}/V"
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136" "lines")
-      ("V_{batt}/V" 
+      ("V_{batt}/V"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136" "lines")
-      ("T_{batt}/°C" 
+      ("T_{batt}/°C"
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136" "lines")
-      ("SOC/%" 
+      ("SOC/%"
        "module_statuses.param_5" "module_statuses.module_id = 136" "lines lw 2 lc rgb 'green'")))
     ("solar-diagram"
      ("logs" ("header" "module_statuses") "header.time_send"
@@ -270,6 +292,16 @@
       ("T_{platform}"
        "module_statuses.param_2 / 10" "module_statuses.module_id = 16" "lines lc rgb 'dark-green'")))
     ;; Tables
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (<output-set-name>
+    ;;  (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+    ;;                <indexpage-title>
+    ;;                <table-title> as-table)
+    ;;  ((<table-column1-header>
+    ;;    <SQL-value1-column> <SQL-WHERE>)
+    ;;   (<tablecolumn2-header>
+    ;;    <SQL-value2-column> <SQL-WHERE>)
+    ;;   ...))
     ("battery-table"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Battery"
@@ -290,7 +322,7 @@
        "module_statuses.param_2" "module_statuses.module_id = 136")
       ('("T" (sub "batt") "/°C" )
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
-      ("SOC/%" 
+      ("SOC/%"
        "module_statuses.param_5" "module_statuses.module_id = 136")
       ("Status"
        "module_statuses.status" "module_statuses.module_id = 136")))
@@ -445,6 +477,16 @@
      (("Event"
        "event.data" #f)))
     ;; Front page values
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (<output-set-name>
+    ;;  (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+    ;;                <title-unused>
+    ;;                <table-title> as-values)
+    ;;  ((<row1-title>
+    ;;    <SQL-value1-column> <SQL-WHERE>)
+    ;;   (<row2-title>
+    ;;    <SQL-value2-column> <SQL-WHERE>)
+    ;;   ...))
     ("current-battery"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Battery"
@@ -465,7 +507,7 @@
        "module_statuses.param_2" "module_statuses.module_id = 136")
       ('("T" (sub "batt") "/°C" )
        "module_statuses.param_7 / 10" "module_statuses.module_id = 136")
-      ("SOC/%" 
+      ("SOC/%"
        "module_statuses.param_5" "module_statuses.module_id = 136")))
     ("current-solar"
      ("logs" ("header" "module_statuses") "header.time_send"
@@ -548,7 +590,7 @@
       ('("I" (sub "L2"))
        "module_statuses.param_5 / 100" "module_statuses.module_id = 11")
       ('("I" (sub "L3"))
-       "module_statuses.param_9 / 100" "module_statuses.module_id = 11")))							    
+       "module_statuses.param_9 / 100" "module_statuses.module_id = 11")))
     ("current-frequency"
      ("logs" ("header" "module_statuses") "header.time_send"
       "Frequency"
@@ -619,9 +661,95 @@
        "module_statuses.status" "module_statuses.module_id = 11")
       ("PR Id"
        "header.powerrouter_id" "TRUE")))
+    ;; Aggregate values: Energy balance
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (<output-set-name>
+    ;;  (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+    ;;                <>
+    ;;                <> as-balance)
+    ;;  ((<value1-title>
+    ;;    <SQL-value1-column> <SQL-WHERE>)
+    ;;   (<value2-title>
+    ;;    <SQL-value2-column> <SQL-WHERE>)
+    ;;   ...))
+    ("balance"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Balance"
+      "Balance" as-balance)
+     (('("W" (sub "prod") "/kWh")
+       "(w_dcac_1::NUMERIC - w_dcac_0::NUMERIC) / 1000" "")
+      ('("W" (sub "sold") "/kWh")
+       "(w_platform_1::NUMERIC - w_platform_0::NUMERIC) / 1000" "")
+      ('("W" (sub "used") "/kWh")
+       "(w_dcac_1::NUMERIC - w_dcac_0::NUMERIC - (w_platform_1::NUMERIC - w_platform_0::NUMERIC)) / 1000" "")))
+    ;; Aggregate values: DCAC efficiency
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (<output-set-name>
+    ;;  (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+    ;;                <>
+    ;;                <> as-dcac-efficiency)
+    ;;  ((<value1-title>
+    ;;    <SQL-value1-column> <SQL-WHERE>)
+    ;;   (<value2-title>
+    ;;    <SQL-value2-column> <SQL-WHERE>)
+    ;;   ...))
+    ("dcac-efficiency"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Efficiency"
+      "Efficiency" as-dcac-efficiency)
+     (('("eta" (sub "solar,DC/AC"))
+       "((ROUND((AVG(p_dcac_local::NUMERIC - p_dcac::NUMERIC) / AVG(p_solar::NUMERIC)), 3))::DOUBLE PRECISION)" "ABS(p_batt::NUMERIC) < 5")
+      ('("eta" (sub "batt,DC/AC"))
+       "((ROUND((AVG(p_dcac_local::NUMERIC - p_dcac::NUMERIC) / AVG(p_batt::NUMERIC)), 3))::DOUBLE PRECISION)" "ABS(p_solar::NUMERIC) < 1")))
+    ;; Aggregate values: Battery efficiency
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (<output-set-name>
+    ;;  (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+    ;;                <>
+    ;;                <> as-battery-efficiency)
+    ;;  ((<value1-title>
+    ;;    <SQL-value1-column> <SQL-WHERE>)
+    ;;   (<value2-title>
+    ;;    <SQL-value2-column> <SQL-WHERE>)
+    ;;   ...))
+    ("battery-efficiency"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Efficiency"
+      "Efficiency" as-battery-efficiency)
+     (('("eta" (sub "batt"))
+       "" "soc = 95")))
+    ;; Simple aggregate values
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (<output-set-name>
+    ;;  (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+    ;;                <>
+    ;;                <> as-extremum)
+    ;;  ((<value1-title>
+    ;;    <SQL-value1-column> <SQL-WHERE>)
+    ;;   (<value2-title>
+    ;;    <SQL-value2-column> <SQL-WHERE>)
+    ;;   ...))
+    ("extrema"
+     ("logs" ("header" "module_statuses") "header.time_send"
+      "Extrema"
+      "Extrema" as-extremum)
+     (('("P" (sub "1,solar,max"))
+       "max(module_statuses.param_2::NUMERIC)" "module_statuses.module_id = 12")
+      ('("P" (sub "2,solar,max"))
+       "max(module_statuses.param_7::NUMERIC)" "module_statuses.module_id = 12")))
     ;; Raw values
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;; Parameter names should be alphanumeric strings (including '_')
     ;; without whitespace.
+    ;; (<output-set-name>
+    ;;  (<SQL-schema> (<SQL-table-a> <SQL-table-b> ...) <SQL-time-column>
+    ;;                <title-unused>
+    ;;                <title-unused> as-raw-values)
+    ;;  ((<value1-title>
+    ;;    <SQL-value1-column> <SQL-WHERE>)
+    ;;   (<value2-title>
+    ;;    <SQL-value2-column> <SQL-WHERE>)
+    ;;   ...))
     ("current-raw"
      ("logs" ("header" "module_statuses") "header.time_send"
       ""
@@ -672,7 +800,7 @@
        "module_statuses.param_5 / 100" "module_statuses.module_id = 12")
       ("V_charge/V"
        "module_statuses.param_9 / 100" "module_statuses.module_id = 136")
-      ("V_discharge/V" 
+      ("V_discharge/V"
        "module_statuses.param_11 / 100" "module_statuses.module_id = 136")
       ("V_batt/V"
        "module_statuses.param_0 / 100" "module_statuses.module_id = 136")
@@ -805,6 +933,10 @@
 
 (define (dot-append . strings) (string-join strings "."))
 
+(define (underscorify string)
+  (string-downcase
+   (string-join (string-tokenize string char-set:letter+digit) "_")))
+
 ;;; Put a log entry into file +log-dir+/<basename>.log
 (define (file-log basename . message-parts)
   (system* "mkdir" "-p" +log-dir+)
@@ -880,6 +1012,28 @@
      (list
       (subtract-duration latest-halfday-time one-day)
       (add-duration latest-halfday-time one-day)))))
+
+;;; Return date-intervals appended with n previous date intervals of the
+;;; same duration
+(define (previous-date-intervals n date-intervals)
+  (if (zero? n)
+      date-intervals
+      (let* ((current-date0 (last (car date-intervals)))
+	     (current-date1 (last (cdr date-intervals)))
+	     (current-time0
+	      (date->time-utc (string->date current-date0
+					    "~Y-~m-~dT~H:~M")))
+	     (current-time1
+	      (date->time-utc (string->date current-date1
+					    "~Y-~m-~dT~H:~M")))
+	     (duration (time-difference current-time1 current-time0))
+	     (previous-time0 (subtract-duration current-time0 duration)))
+	(previous-date-intervals
+	 (1- n)
+	 (cons (append (car date-intervals)
+		       (list (date->string (time-utc->date previous-time0)
+					   "~Y-~m-~dT~H:~M")))
+	       (append (cdr date-intervals) (list current-date0)))))))
 
 (define (p-rout-view request body)
   (when +verbose+
@@ -981,7 +1135,7 @@
 (define (view-handler request body)
   (values (build-response #:code 200
 			  #:reason-phrase "Ok"
-			  #:headers `((content-type . (text/html)) 
+			  #:headers `((content-type . (text/html))
 				      (charset . "utf-8")))
 	  (let ((default-dates (map humanize-date-string (around-now))))
 	    (with-output-to-string
@@ -1009,6 +1163,10 @@
 		      (p ,(sxml-output-set-inputs 'as-diagram))
 		      (h4 "Tables")
 		      (p ,(sxml-output-set-inputs 'as-table))
+		      (p (input (@ (type "radio")
+				(name "output-set")
+				(value "AGGREGATES"))
+				"Energy Balance & Efficiency (be patient)"))
 		      (p (input (@ (type "submit")
 				   (value "Go"))))))
 		    ,(sxml-latest-value-tables-div)))))))))
@@ -1016,26 +1174,28 @@
 (define (view-raw-handler request body)
   (values (build-response #:code 200
 			  #:reason-phrase "Ok"
-			  #:headers `((content-type . (text/plain)) 
+			  #:headers `((content-type . (text/plain))
 				      (charset . "utf-8")))
 	  (let ((powerrouter-id (third (uri-elements request))))
 	    (get-raw-values-text "current-raw" powerrouter-id))))
 
 (define (view-render-handler request body)
-  (let ((render-mode
-	 (render-mode (cdr (assoc "output-set"
-				  (uri-query-components request))))))
+  (let* ((output-set (cdr (assoc "output-set"
+				 (uri-query-components request))))
+	 (render-mode (if (equal? output-set "AGGREGATES")
+			  'as-table
+			  (render-mode output-set))))
     (cond ((eq? 'as-diagram render-mode)
 	   (view-render-diagram-handler request body))
 	  ((eq? 'as-table render-mode)
 	   (view-render-table-handler request body)))))
-	   
+
 (define (view-render-diagram-handler request body)
   (let ((query-alist (uri-query-components request)))
     (values
      (build-response #:code 200
 		     #:reason-phrase "Ok"
-		     #:headers `((content-type . (image/svg+xml)) 
+		     #:headers `((content-type . (image/svg+xml))
 				 (charset . "utf-8")))
      (catch #t
        (lambda ()
@@ -1053,13 +1213,13 @@
 				 (xmlns "http://www.w3.org/2000/svg"))
 			      (title "No Data")
 			      (text "No Data"))))))))))
-	   
+
 (define (view-render-table-handler request body)
   (let ((query-alist (uri-query-components request)))
     (values
      (build-response #:code 200
 		     #:reason-phrase "Ok"
-		     #:headers `((content-type . (text/html)) 
+		     #:headers `((content-type . (text/html))
 				 (charset . "utf-8")))
      (catch #t
        (lambda ()
@@ -1081,7 +1241,7 @@
 (define (view-lib-handler request body)
   (values (build-response #:code 200
 			  #:reason-phrase "Ok"
-			  #:headers `((content-type . (text/javascript)) 
+			  #:headers `((content-type . (text/javascript))
 				      (charset . "utf-8")))
 	  (let ((file-name
 		 (string-append
@@ -1095,7 +1255,7 @@
 (define (view-lib-datetimepicker-handler request body)
   (values (build-response #:code 200
 			  #:reason-phrase "Ok"
-			  #:headers `((content-type . (text/javascript)) 
+			  #:headers `((content-type . (text/javascript))
 				      (charset . "utf-8")))
 	  (let ((file-name
 		 (string-append
@@ -1135,6 +1295,126 @@
    " FROM t) = 0"
    " LIMIT " (number->string number-of-rows)))
 
+;;; Return a SQL statement that fetches an aggregate value
+(define (get-extremum-sql
+	 output-set curve-name powerrouter-id from-date to-date)
+  (string-append
+   "SELECT " (columnname output-set curve-name) " AS value "
+   "FROM " (let ((tables (tables output-set)))
+	     (if (> (length tables) 1)
+		 (string-append (string-join tables " JOIN ")
+				" USING (" +record-id-column+ ") ")
+		 (car tables)))
+   "WHERE ("
+   (date-column output-set)
+   " BETWEEN '" from-date "' AND '" to-date "')"
+   " AND powerrouter_id = '" powerrouter-id "'"
+   (let ((sql-where (sql-where output-set curve-name)))
+     (if sql-where
+	 (string-append " AND " sql-where)
+	 ""))))
+
+;;; Return a SQL statement that fetches the estimated dcac efficiency
+;;; during a time interval
+(define (get-dcac-efficiency-sql
+	 output-set curve-name powerrouter-id from-date to-date)
+  (string-append
+   "WITH "
+   "int (date0, date1) AS"
+   " (VALUES ('" from-date "', '" to-date "')), "
+   "batt (date, p_batt, " +record-id-column+ ", powerrouter_id) AS"
+   " (SELECT " (date-column output-set) ", module_statuses.param_2, "
+   +record-id-column+ ", header.powerrouter_id"
+   "  FROM logs.header JOIN logs.module_statuses USING (" +record-id-column+ ")"
+   "  WHERE module_statuses.module_id = 136), "
+   "dcac (p_dcac, p_dcac_local, " +record-id-column+ ") AS"
+   " (SELECT module_statuses.param_2, module_statuses.param_6, "
+   +record-id-column+
+   "  FROM logs.header JOIN logs.module_statuses USING (" +record-id-column+ ")"
+   "  WHERE module_statuses.module_id = 9), "
+   "solar (p_solar, " +record-id-column+ ") AS"
+   " (SELECT module_statuses.param_10, " +record-id-column+ ""
+   "  FROM logs.header JOIN logs.module_statuses USING (" +record-id-column+ ")"
+   "  WHERE module_statuses.module_id = 12) "
+   "SELECT " (columnname output-set curve-name) " AS value "
+   "FROM int,  batt JOIN dcac USING (" +record-id-column+ ") JOIN solar"
+   "   USING (" +record-id-column+ ") "
+   " WHERE (date BETWEEN date0 AND date1)"
+   " AND powerrouter_id = '" powerrouter-id "'"
+   (let ((sql-where (sql-where output-set curve-name)))
+     (if sql-where
+	 (string-append " AND " sql-where)
+	 ""))
+   " GROUP BY date0, date1"))
+
+;;; Return a SQL statement that fetches the estimated battery efficiency
+;;; during a time interval
+(define (get-battery-efficiency-sql
+	 output-set curve-name powerrouter-id from-date to-date)
+  (string-append
+   "WITH "
+   "batt (date, w_batt_in, w_batt_out, soc, powerrouter_id) AS"
+   " (SELECT " (date-column output-set) ", module_statuses.param_4,"
+   "   module_statuses.param_3, module_statuses.param_5, header.powerrouter_id"
+   "  FROM logs.header JOIN logs.module_statuses USING (" +record-id-column+ ")"
+   "  WHERE module_statuses.module_id = 136), "
+   "b_soc (date, w_batt_in, w_batt_out, soc, powerrouter_id) AS"
+   " (SELECT date, w_batt_in, w_batt_out, soc, powerrouter_id"
+   "  FROM batt"
+   " WHERE (date BETWEEN '" from-date "' AND '" to-date "')"
+   " AND powerrouter_id = '" powerrouter-id "'"
+   (let ((sql-where (sql-where output-set curve-name)))
+     (if sql-where
+	 (string-append " AND " sql-where)
+	 ""))
+   " ), "
+   "b_0 (w_batt_in_0, w_batt_out_0, soc_0) AS"
+   " (SELECT w_batt_in, w_batt_out, soc"
+   "  FROM b_soc"
+   "  ORDER BY date"
+   "  LIMIT 1), "
+   "b_1 (w_batt_in_1, w_batt_out_1, soc_1) AS"
+   " (SELECT w_batt_in, w_batt_out, soc"
+   "  FROM b_soc"
+   "  ORDER BY date DESC"
+   "  LIMIT 1) "
+   "SELECT ((ROUND(((w_batt_out_1::NUMERIC - w_batt_out_0::NUMERIC) /"
+   "              (w_batt_in_1::NUMERIC - w_batt_in_0::NUMERIC)), 3))::DOUBLE PRECISION) AS value "
+   "FROM b_0, b_1"))
+
+;;; Return a SQL statement that fetches the energy usage
+;;; over a time interval
+(define (get-balance-sql
+	 output-set curve-name powerrouter-id from-date to-date)
+  (string-append
+   "WITH "
+   "dcac (date, w_dcac, " +record-id-column+ ", powerrouter_id) AS"
+   " (SELECT " (date-column output-set) ", module_statuses.param_3, "
+   +record-id-column+ ", header.powerrouter_id"
+   "  FROM logs.header JOIN logs.module_statuses USING (" +record-id-column+ ")"
+   "  WHERE module_statuses.module_id = 9), "
+   "platform (w_platform, " +record-id-column+ ") AS"
+   " (SELECT module_statuses.param_4, " +record-id-column+ ""
+   "  FROM logs.header JOIN logs.module_statuses USING (" +record-id-column+ ")"
+   "  WHERE module_statuses.module_id = 16), "
+   "w (date, w_dcac, w_platform, " +record-id-column+ ") AS"
+   " (SELECT date, w_dcac, w_platform, " +record-id-column+ ""
+   "  FROM dcac JOIN platform USING (" +record-id-column+ ")"
+   " WHERE (date BETWEEN '" from-date "' AND '" to-date "')"
+   " AND powerrouter_id = '" powerrouter-id "'), "
+   "w_0 (w_dcac_0, w_platform_0) AS"
+   " (SELECT w_dcac, w_platform"
+   "  FROM w"
+   "  ORDER BY date"
+   "  LIMIT 1), "
+   "w_1 (w_dcac_1, w_platform_1) AS"
+   " (SELECT w_dcac, w_platform"
+   "  FROM w"
+   "  ORDER BY date DESC"
+   "  LIMIT 1) "
+   "SELECT " (columnname output-set curve-name) " AS value "
+   "FROM w_0, w_1"))
+
 ;;; Return data for one curve the way Gnuplot understands it
 (define (get-curve-points output-set curve-name powerrouter-id from-date to-date)
   (let ((sql (get-sql-row-sql output-set curve-name
@@ -1157,7 +1437,7 @@
 		 (display (cdr (second row)))))
 	     "\n")))))
 
-;;; date-column?=#t means return an html table column made of date/time
+;;; date-column?=#t means return an sxml table column made of date/time
 (define (get-sxml-table-column
 	 output-set curve-name powerrouter-id from-date to-date date-column?)
   (let ((sql (get-sql-row-sql output-set
@@ -1213,6 +1493,60 @@
 	 (td ,(if row
 		  (cdr (assoc "value" row))
 		  "0")))))
+
+;;; A single sxml table cell containing an aggregate value
+(define (get-sxml-aggregate-value-cell
+	 output-set curve-name powerrouter-id date0 date1)
+  (let* ((render-mode (render-mode output-set))
+	 (sql-function (cond ((eq? render-mode 'as-dcac-efficiency)
+			      get-dcac-efficiency-sql)
+			     ((eq? render-mode 'as-extremum)
+			      get-extremum-sql)
+			     ((eq? render-mode 'as-battery-efficiency)
+			      get-battery-efficiency-sql)
+			     ((eq? render-mode 'as-balance)
+			      get-balance-sql))))
+    (logged-query
+     "db" (sql-function output-set curve-name powerrouter-id date0 date1))
+    (let ((row (dbi-get_row *db*)))
+      `(td ,(if row
+		(cdr (assoc "value" row))
+		"-")))))
+
+;;; header-row?=#t means return an sxml table row of column headers
+(define (get-sxml-aggregate-value-row
+	 powerrouter-id from-date to-date header-row?)
+  `(tr
+    ,@(if header-row?
+	  '((th "From") (th "To"))
+	  `((td ,(humanize-date-string from-date))
+	    (td ,(humanize-date-string to-date))))
+    ,@(map
+       (lambda (x)
+	 (if header-row?
+	     `(td ,(cdr x))
+	     (get-sxml-aggregate-value-cell
+	      (car x) (cdr x) powerrouter-id from-date to-date)))
+       (append-map (lambda (output-set)
+		     (map (lambda (curve-name) (cons output-set curve-name))
+			  (curve-names output-set)))
+		   (filter (lambda (output-set) (memq (render-mode output-set)
+						      '(as-dcac-efficiency
+							as-battery-efficiency
+							as-extremum
+							as-balance)))
+			   (output-sets))))))
+
+;;; Table of output-set with one line per date interval
+(define (get-sxml-aggregate-value-table powerrouter-id from-dates to-dates)
+  `(table
+    (tr (th (@ (colspan "2")))
+	(th (@ (colspan "8")) "Energy Balance & Efficiency"))
+    ,(get-sxml-aggregate-value-row #f #f #f #t)
+    ,@(map
+       (lambda (from-date to-date)
+	 (get-sxml-aggregate-value-row powerrouter-id from-date to-date #f))
+       from-dates to-dates)))
 
 ;;; Date of newest record for powerrouter-id
 (define (current-value-date powerrouter-id)
@@ -1348,36 +1682,41 @@
 	 (body
 	  (div
 	   (@ (style "text-align:center;" "margin:auto auto 50px auto;"))
-	   ,(get-sxml-table output-set powerrouter-id from-date to-date))))))))
+	   ,(if (equal? output-set "AGGREGATES")
+		(begin
+		  (let ((intervals (previous-date-intervals
+				    0
+				    (cons (list from-date) (list to-date)))))
+		    (get-sxml-aggregate-value-table
+		     powerrouter-id (car intervals) (cdr intervals))))
+		(get-sxml-table output-set powerrouter-id from-date to-date)))))))))
 
-;;; Create an index named <schema>.<table>_<column>_index if necessary
-(define (create-index schema table column)
-  (logged-query "db" (string-append
-		      "SELECT "
-		      "t.relname AS table_name, "
-		      "i.relname AS index_name, "
-		      "a.attname AS column_name, "
-		      "n.nspname AS schema "
-		      "FROM "
-		      "pg_namespace n, pg_class t, "
-		      "pg_class i, "
-		      "pg_index ix, "
-		      "pg_attribute a "
-		      "WHERE "
-		      "n.oid = t.relnamespace "
-		      "AND t.oid = ix.indrelid "
-		      "AND i.oid = ix.indexrelid "
-		      "AND a.attrelid = t.oid "
-		      "AND a.attnum = ANY(ix.indkey) "
-		      "AND t.relkind = 'r' "
-		      "AND n.nspname = '" schema "' "
-		      "AND t.relname = '" table "' "
-		      "AND a.attname = '" column "';"))
-  (unless (dbi-get_row *db*)
-    (logged-query "db" (string-append
-			"CREATE INDEX " table "_" column "_index "
-			"ON " schema "." table " (" column ");"))))
-
+;;; Create an index named <schema>.<table>_<column>_index_where_<where>
+;;; if necessary
+(define (create-index schema table column where)
+  (let* ((index-name
+	  (string-append table "_" (underscorify column)
+			 (if where
+			     (string-append "_where_" (underscorify where))
+			     "")
+			 "_index"))
+	 (create-index-sql
+	  (string-append
+	   "CREATE INDEX " index-name " ON " schema "." table " (" column ")"
+	   (if where
+	       (string-append " WHERE " where)
+	       ";"))))
+    (logged-query "db"
+		  (string-append
+		   "SELECT i.relname "
+		   "FROM pg_index AS idx"
+		   " JOIN pg_class AS i ON i.oid = idx.indexrelid"
+		   " JOIN pg_am AS am ON i.relam = am.oid"
+		   " JOIN pg_namespace AS ns ON i.relnamespace = ns.oid "
+		   "WHERE nspname = '" schema "'"
+		   " AND relname = '" index-name "';"))
+    (unless (dbi-get_row *db*)
+      (logged-query "db" create-index-sql))))
 
 ;;; Return text, one piece per element of stuff, created in fun, a function
 ;;; of the element number (as a string), and of the list element
