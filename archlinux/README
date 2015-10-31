@@ -88,7 +88,7 @@ Updating p-rout on Arch Linux
       su p-rout
       cd
       rm -rf p-rout-git*
-      wget https://aur.archlinux.org/packages/p-/p-rout-git/p-rout-git.tar.gz
+      wget https://aur.archlinux.org/cgit/aur.git/snapshot/p-rout-git.tar.gz
       tar -xzf p-rout-git.tar.gz
       cd p-rout-git
       makepkg -i
