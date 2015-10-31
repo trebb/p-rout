@@ -1,4 +1,4 @@
-SUBDIRS = 
+SUBDIRS =
 ACLOCAL_AMFLAGS = -I build-aux
 PKG_LIST_VERSION=$(shell echo $(PACKAGE_VERSION) | sed "s/\./ /g")
 SOURCES = p-rout-collect.scm p-rout-view.scm p-rout-restore.scm p-rout-prune.scm

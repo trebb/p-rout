@@ -1,8 +1,8 @@
 #!/usr/bin/guile -s
 !#
 
-;;;; Copyright (c) 2014 Bert Burgemeister  trebbu@googlemail.com
-;;;; 
+;;;; Copyright (c) 2014, 2015 Bert Burgemeister  trebbu@googlemail.com
+;;;;
 ;;;; Permission is hereby granted, free of charge, to any person
 ;;;; obtaining a copy of this software and associated documentation
 ;;;; files (the "Software"), to deal in the Software without
@@ -11,10 +11,10 @@
 ;;;; copies of the Software, and to permit persons to whom the
 ;;;; Software is furnished to do so, subject to the following
 ;;;; conditions:
-;;;; 
+;;;;
 ;;;; The above copyright notice and this permission notice shall be
 ;;;; included in all copies or substantial portions of the Software.
-;;;; 
+;;;;
 ;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 ;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -32,13 +32,13 @@
 ;;;;  { "table_one" :
 ;;;;    [ { "column1" : 5001,
 ;;;;        "column2" : 1
-;;;;      }, 
+;;;;      },
 ;;;;      { "column1" : 9,
 ;;;;        "column3" : 1,
 ;;;;        "column4" : 342
 ;;;;      }
 ;;;;    ],
-;;;;    "table_two" : 
+;;;;    "table_two" :
 ;;;;    { "column1" : 3,
 ;;;;      "column2" : "2014-04-20T22:09:15+01:00"
 ;;;;    },
@@ -162,11 +162,11 @@
 		(json-string->scm (utf8->string body)))
   (values (build-response #:code 201
 			  #:reason-phrase "Created"
-			  #:headers `((content-type . (application/json)) 
+			  #:headers `((content-type . (application/json))
 				      (charset . "utf-8")
 				      (server . "nginx")
-				      (cache-control . (no-cache 
-							private 
+				      (cache-control . (no-cache
+							private
 							(max-age . 0)
 							must-revalidate))
 				      (date . ,(current-date))
@@ -290,7 +290,7 @@
   (match table-content
     ((((string . _) ...) ...)
      (map
-      (lambda (array-element) 
+      (lambda (array-element)
 	(map function array-element))
       table-content))
     (((string . _) ...)
@@ -320,7 +320,7 @@
     (if (string-suffix? uri-extension filename)
 	(string-drop-right filename (string-length uri-extension))
 	#f)))
-  
+
 ;;; Put data from JSON payload into SQL database whose name is derived
 ;;; from uri-path
 (define (store-record uri-path payload)
@@ -336,7 +336,7 @@
     (logged-query "db" "BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE")
     (let ((next-id
 	   (apply
-	    max 
+	    max
 	    (map
 	     (lambda (table)
 	       (logged-query (dot-append schema table)
@@ -349,7 +349,7 @@
 		   ((("last_id" . latest-row))
 		    (if (number? latest-row)
 			(+ 1 latest-row)
-			0))	  
+			0))
 		   (_ 0))))
 	     tablenames))))
       (for-each
@@ -391,4 +391,3 @@
 		'http
 		`(#:port ,+port+ #:addr ,(inet-pton AF_INET +addr+))))
   (lambda () (dbi-close *db*)))
-

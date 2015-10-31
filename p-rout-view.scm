@@ -1,7 +1,7 @@
 #!/usr/bin/guile -s
 !#
 
-;;;; Copyright (c) 2014 Bert Burgemeister  trebbu@googlemail.com
+;;;; Copyright (c) 2014, 2015 Bert Burgemeister  trebbu@googlemail.com
 ;;;;
 ;;;; Permission is hereby granted, free of charge, to any person
 ;;;; obtaining a copy of this software and associated documentation
@@ -123,7 +123,7 @@
 (define +diagram-number-of-values+ 400)
 (define *db* #f)
 
-(define +db-indexes+			;((schema table column) ...)
+(define +db-indexes+			;((schema table column where) ...)
   '(("logs" "header" "p_rout_id" #f)
     ("logs" "header" "time_send" #f)
     ("logs" "module_statuses" "p_rout_id" #f)
@@ -1595,12 +1595,12 @@
 
 ;;; Table of output-set with rows of latest values
 (define (get-latest-value-sxml-table output-set powerrouter-id)
-  (cons* 'table
-	 `(th (@ (colspan "2")) ,(table-title output-set))
-	 (map
-	  (lambda (curve-name)
-	    (get-sxml-current-value-row output-set curve-name powerrouter-id))
-	  (curve-names output-set))))
+  `(table
+    (th (@ (colspan "2")) ,(table-title output-set))
+    ,@(map
+       (lambda (curve-name)
+	 (get-sxml-current-value-row output-set curve-name powerrouter-id))
+       (curve-names output-set))))
 
 ;;; List of pairs of strings (name value)
 (define (get-raw-value-pairs output-set powerrouter-id)
@@ -1645,10 +1645,8 @@
 		   output-set column-name powerrouter-id from-date to-date #f))
 		column-names)))
 	 (all-columns (append date-column value-columns)))
-    (cons 'table (apply map
-			(lambda (. table-cells)
-			  (cons 'tr table-cells))
-			all-columns))))
+    `(table ,(apply map (lambda (. table-cells) `(tr ,table-cells))
+		    all-columns))))
 
 (define (plot-svg output-set powerrouter-id from-date to-date)
   (let* ((gp (run-with-pipe "r+" "gnuplot"))
